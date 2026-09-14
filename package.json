@@ -48,6 +48,7 @@
     "/dist/*.d.ts",
     "/dist/*.js.map",
     "/assets/*.css",
+    "/assets/*.glb",
     "/src/*.ts"
   ],
   "packageManager": "pnpm@11.5.1",

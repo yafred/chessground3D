@@ -176,6 +176,7 @@ export function createChessScene(sceneRoot: HTMLElement, state: State): ChessSce
       applyState(state);
 
       scene.visible = true;
+      return undefined;
     },
   );
 

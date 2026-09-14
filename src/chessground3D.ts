@@ -32,7 +32,7 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
     redraw: () => {},
     redrawNow: () => {},
     unbind: () => {},
-    elements: elements,
+    elements,
     bounds: Object.assign(() => element.getBoundingClientRect(), {
       clear() {},
     }),
@@ -41,7 +41,7 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
   let cancelNewPieceDrag: (() => void) | undefined;
 
   return {
-    state: state,
+    state,
 
     set(config) {
       configure(state, config);

@@ -2,6 +2,7 @@ import { type DrawBrushes, type DrawShape } from '@lichess-org/chessground/draw'
 import * as THREE from 'three';
 
 import { createArrowMesh, createCustomSvgMesh } from '../objects/createAutoShapes.js';
+
 import { keyToCoordinates } from './interaction.js';
 
 export function clearAutoShapes(group: THREE.Group) {

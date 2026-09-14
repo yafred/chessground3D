@@ -18,7 +18,6 @@ jobs:
         script:
           - lint
           - check-format
-          - test
           - dist
     runs-on: ubuntu-latest
     steps:

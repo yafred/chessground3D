@@ -1,5 +1,6 @@
 {
   "name": "chessground3D",
+  "version": "0.1.0",
   "description": "3D chess UI based on Chessground",
   "type": "module",
   "main": "dist/chessground3D.js",
@@ -44,9 +45,7 @@
     "test:watch": "vitest"
   },
   "files": [
-    "/dist/*.js",
-    "/dist/*.d.ts",
-    "/dist/*.js.map",
+    "dist",
     "/assets/*.css",
     "/assets/*.glb",
     "/src/*.ts"

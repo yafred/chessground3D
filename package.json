@@ -1,0 +1,58 @@
+{
+  "name": "chessground3D",
+  "description": "3D chess UI based on Chessground",
+  "type": "module",
+  "main": "dist/chessground3D.js",
+  "types": "dist/chessground3D.d.ts",
+  "exports": {
+    ".": "./dist/chessground3D.js",
+    "./assets/*": "./assets/*",
+    "./*": "./dist/*.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ]
+    }
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@lichess-org/chessground": "^10.1.1",
+    "@types/three": "^0.185.4",
+    "esbuild": "^0.28.1",
+    "jsdom": "^26.1.0",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
+    "oxlint-tsgolint": "^0.24.0",
+    "three": "^0.185.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.6"
+  },
+  "scripts": {
+    "prepare": "$npm_execpath run compile",
+    "compile": "tsc --sourceMap --declaration",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "check-format": "oxfmt --check",
+    "bundle": "esbuild src/chessground3D.ts --bundle --format=esm --outfile=dist/chessground3D.min.js --minify",
+    "dist": "$npm_execpath run compile && $npm_execpath run bundle",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "files": [
+    "/dist/*.js",
+    "/dist/*.d.ts",
+    "/dist/*.js.map",
+    "/assets/*.css",
+    "/src/*.ts"
+  ],
+  "packageManager": "pnpm@11.5.1",
+  "engines": {
+    "node": ">=22",
+    "pnpm": "11"
+  }
+}

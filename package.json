@@ -46,9 +46,8 @@
   },
   "files": [
     "dist",
-    "/assets/*.css",
     "/assets/*.glb",
-    "/src/*.ts"
+    "/src/**/*.ts"
   ],
   "packageManager": "pnpm@11.22.0",
   "engines": {

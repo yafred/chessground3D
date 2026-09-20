@@ -939,6 +939,10 @@ export function setupPieceInteraction({
       return;
     }
 
+    if (event.button !== 0) {
+      return;
+    }
+
     if (dragState && event.pointerId === dragState.pointerId) {
       finishDrag(event);
       return;

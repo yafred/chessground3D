@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { pieceCodes } from './util.js';
+import { getPieceAtSquare, pieceCodes } from './util.js';
 
 const hoverHighlightColor = new THREE.Color('#8fd3ff');
 const pinnedHighlightColor = new THREE.Color('#2f6fff');
@@ -39,21 +39,6 @@ function getPieceMeshFromObject(object: THREE.Object3D | null): THREE.Mesh | nul
   }
 
   return null;
-}
-
-function getPieceAtSquare(scene: THREE.Scene, x: number, z: number): THREE.Mesh | null {
-  let pieceAtSquare: THREE.Mesh | null = null;
-  scene.traverse(obj => {
-    if (pieceAtSquare || !(obj instanceof THREE.Mesh) || !pieceCodes.has(obj.name)) {
-      return;
-    }
-
-    if (Math.abs(obj.position.x - x) < 0.001 && Math.abs(obj.position.z - z) < 0.001) {
-      pieceAtSquare = obj;
-    }
-  });
-
-  return pieceAtSquare;
 }
 
 export function createPieceHoverController(

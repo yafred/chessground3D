@@ -1,5 +1,6 @@
 import type { Key } from '@lichess-org/chessground/types';
 import { key2pos } from '@lichess-org/chessground/util';
+import * as THREE from 'three';
 
 export const pieceCodes = new Set(['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p']);
 
@@ -32,4 +33,25 @@ export function parseSquare(square: string): { x: number; z: number } | null {
     x: fileIndex - 3.5,
     z: 4.5 - rank,
   };
+}
+
+export function getPieceAtSquare(
+  scene: THREE.Scene,
+  x: number,
+  z: number,
+  ignorePiece?: THREE.Mesh,
+): THREE.Mesh | null {
+  let pieceAtSquare: THREE.Mesh | null = null;
+
+  scene.traverse(obj => {
+    if (pieceAtSquare || !(obj instanceof THREE.Mesh) || !pieceCodes.has(obj.name) || obj === ignorePiece) {
+      return;
+    }
+
+    if (Math.abs(obj.position.x - x) < 0.001 && Math.abs(obj.position.z - z) < 0.001) {
+      pieceAtSquare = obj;
+    }
+  });
+
+  return pieceAtSquare;
 }

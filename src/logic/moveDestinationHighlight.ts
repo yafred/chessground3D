@@ -1,33 +1,12 @@
 import { type Key } from '@lichess-org/chessground/types';
-import * as THREE from 'three';
+import type * as THREE from 'three';
 
 import { createMoveDestinationHighlightMarker } from '../objects/createMarkers.js';
 
-import { coordinatesToSquare, parseSquare, pieceCodes } from './util.js';
+import { coordinatesToSquare, getPieceAtSquare, parseSquare } from './util.js';
 
 function getSquareCoordinate(value: number): number {
   return Math.round(value + 3.5) - 3.5;
-}
-
-function getPieceAtSquare(
-  scene: THREE.Scene,
-  x: number,
-  z: number,
-  ignorePiece?: THREE.Mesh,
-): THREE.Mesh | null {
-  let pieceAtSquare: THREE.Mesh | null = null;
-
-  scene.traverse(obj => {
-    if (pieceAtSquare || !(obj instanceof THREE.Mesh) || !pieceCodes.has(obj.name) || obj === ignorePiece) {
-      return;
-    }
-
-    if (Math.abs(obj.position.x - x) < 0.001 && Math.abs(obj.position.z - z) < 0.001) {
-      pieceAtSquare = obj;
-    }
-  });
-
-  return pieceAtSquare;
 }
 
 export function clearMoveDestinationHighlights(highlightGroup: THREE.Group) {

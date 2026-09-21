@@ -6,7 +6,7 @@ import { createPremoveHighlightMarker } from '../objects/createMarkers';
 
 import { type PieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
-import { coordinatesToSquare, keyToCoordinates, parseSquare, pieceCodes } from './util.js';
+import { coordinatesToSquare, getPieceAtSquare, keyToCoordinates, parseSquare, pieceCodes } from './util.js';
 
 type DragState = {
   piece: THREE.Mesh;
@@ -154,22 +154,6 @@ export function setupPieceInteraction({
 
   function isWithinBoard(x: number, z: number): boolean {
     return Math.abs(x) <= 4 && Math.abs(z) <= 4;
-  }
-
-  function getPieceAtSquare(x: number, z: number, ignorePiece?: THREE.Mesh): THREE.Mesh | null {
-    let pieceAtSquare: THREE.Mesh | null = null;
-
-    scene.traverse(obj => {
-      if (pieceAtSquare || !(obj instanceof THREE.Mesh) || !pieceCodes.has(obj.name) || obj === ignorePiece) {
-        return;
-      }
-
-      if (Math.abs(obj.position.x - x) < 0.001 && Math.abs(obj.position.z - z) < 0.001) {
-        pieceAtSquare = obj;
-      }
-    });
-
-    return pieceAtSquare;
   }
 
   function isWhitePiece(piece: THREE.Mesh): boolean {
@@ -355,7 +339,7 @@ export function setupPieceInteraction({
     const fromSquareZ = getSquareCoordinate(fromZ);
     const targetSquareX = getSquareCoordinate(targetX);
     const targetSquareZ = getSquareCoordinate(targetZ);
-    const occupyingPiece = getPieceAtSquare(targetX, targetZ, movingPiece);
+    const occupyingPiece = getPieceAtSquare(scene, targetX, targetZ, movingPiece);
     if (!occupyingPiece) {
       movingPiece.position.set(targetX, movingPiece.position.y, targetZ);
       setLastMoveHighlights(fromSquareX, fromSquareZ, targetX, targetZ);
@@ -489,7 +473,7 @@ export function setupPieceInteraction({
       return false;
     }
 
-    const movingPiece = getPieceAtSquare(source.x, source.z);
+    const movingPiece = getPieceAtSquare(scene, source.x, source.z);
     if (!movingPiece) {
       return false;
     }
@@ -584,7 +568,7 @@ export function setupPieceInteraction({
       return false;
     }
 
-    const movingPiece = getPieceAtSquare(sourceX, sourceZ);
+    const movingPiece = getPieceAtSquare(scene, sourceX, sourceZ);
     if (!movingPiece) {
       return false;
     }
@@ -620,7 +604,7 @@ export function setupPieceInteraction({
       return;
     }
 
-    const targetPiece = getPieceAtSquare(coords.x, coords.z);
+    const targetPiece = getPieceAtSquare(scene, coords.x, coords.z);
 
     if (selectedPiece) {
       if (targetPiece === selectedPiece) {

@@ -2,8 +2,8 @@ import * as THREE from 'three';
 
 import { pieceCodes } from './util.js';
 
-const hoverHighlightColor = new THREE.Color(0x8f_d3_ff);
-const pinnedHighlightColor = new THREE.Color(0x2f_6f_ff);
+const hoverHighlightColor = new THREE.Color('#8fd3ff');
+const pinnedHighlightColor = new THREE.Color('#2f6fff');
 
 type HighlightMode = 'hover' | 'pinned' | 'drag';
 

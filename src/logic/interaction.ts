@@ -1,5 +1,4 @@
 import { type Color, type Key } from '@lichess-org/chessground/types';
-import { key2pos } from '@lichess-org/chessground/util';
 import * as THREE from 'three';
 import { type OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -7,7 +6,7 @@ import { createPremoveHighlightMarker } from '../objects/createMarkers';
 
 import { type PieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
-import { pieceCodes } from './util.js';
+import { coordinatesToSquare, keyToCoordinates, parseSquare, pieceCodes } from './util.js';
 
 type DragState = {
   piece: THREE.Mesh;
@@ -57,17 +56,6 @@ export type PieceInteractionController = {
   playQueuedPremove: () => boolean; // attempt to play the queued premove now; always clears it
   cancelQueuedPremove: () => void;
 };
-
-export function keyToCoordinates(key: Key): { x: number; z: number } | null {
-  const pos = key2pos(key);
-  if (!pos) {
-    return null;
-  }
-  return {
-    x: pos[0] - 3.5,
-    z: 4.5 - (pos[1] + 1),
-  };
-}
 
 export function setupPieceInteraction({
   scene,
@@ -198,29 +186,9 @@ export function setupPieceInteraction({
 
   hoverController.setPieceHighlightFilter(canInteractWithPiece);
 
-  function parseSquare(square: string): { x: number; z: number } | null {
-    const normalized = square.trim().toLowerCase();
-    if (!/^[a-h][1-8]$/.test(normalized)) {
-      return null;
-    }
-
-    const fileIndex = normalized.charCodeAt(0) - 'a'.charCodeAt(0);
-    const rank = Number.parseInt(normalized[1], 10);
-    return {
-      x: fileIndex - 3.5,
-      z: 4.5 - rank,
-    };
-  }
-
   function coordinatesToUci(fromX: number, fromZ: number, toX: number, toZ: number): string {
     // Convert board coordinates to square notation (a1-h8)
     return coordinatesToSquare(fromX, fromZ) + coordinatesToSquare(toX, toZ);
-  }
-
-  function coordinatesToSquare(x: number, z: number): Key {
-    const fileIndex = Math.round(x + 3.5);
-    const rank = Math.round(4.5 - z);
-    return (String.fromCharCode('a'.charCodeAt(0) + fileIndex) + rank) as Key;
   }
 
   function clearSelectableMoveHighlights() {

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 import { createArrowMesh, createCustomSvgMesh } from '../objects/createAutoShapes.js';
 
-import { keyToCoordinates } from './interaction.js';
+import { keyToCoordinates } from './util.js';
 
 export function clearAutoShapes(group: THREE.Group) {
   for (const child of group.children) {

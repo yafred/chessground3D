@@ -3,30 +3,10 @@ import * as THREE from 'three';
 
 import { createMoveDestinationHighlightMarker } from '../objects/createMarkers.js';
 
-import { pieceCodes } from './util.js';
+import { coordinatesToSquare, parseSquare, pieceCodes } from './util.js';
 
 function getSquareCoordinate(value: number): number {
   return Math.round(value + 3.5) - 3.5;
-}
-
-function coordinatesToSquare(x: number, z: number): Key {
-  const fileIndex = Math.round(x + 3.5);
-  const rank = Math.round(4.5 - z);
-  return (String.fromCharCode('a'.charCodeAt(0) + fileIndex) + rank) as Key;
-}
-
-function parseSquare(square: Key): { x: number; z: number } | null {
-  const normalized = square.trim().toLowerCase();
-  if (!/^[a-h][1-8]$/.test(normalized)) {
-    return null;
-  }
-
-  const fileIndex = normalized.charCodeAt(0) - 'a'.charCodeAt(0);
-  const rank = Number.parseInt(normalized[1], 10);
-  return {
-    x: fileIndex - 3.5,
-    z: 4.5 - rank,
-  };
 }
 
 function getPieceAtSquare(

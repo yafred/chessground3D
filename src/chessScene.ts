@@ -11,7 +11,7 @@ import { createPieceHoverController } from './logic/hover.js';
 import { setupPieceInteraction } from './logic/interaction.js';
 import { applyInteractionPolicy } from './logic/interactionPolicy.js';
 import { setupMoveAttemptAdapter } from './logic/moveAttemptAdapter.js';
-import { pieceCodes } from './logic/util.js';
+import { coordinatesToSquare, pieceCodes } from './logic/util.js';
 import { createA1Marker, createCheckHighlightMarker, createH8Marker } from './objects/createMarkers.js';
 import { piecesToScene } from './objects/createPieces.js';
 import { createPieceTemplates } from './objects/createPieceTemplates.js';
@@ -185,12 +185,6 @@ export function createChessScene(sceneRoot: HTMLElement, state: State): ChessSce
     renderer.render(scene, camera);
   };
   const unregisterRenderStep = registerSceneRenderStep(renderStep);
-
-  function coordinatesToSquare(x: number, z: number): Key {
-    const fileIndex = Math.round(x + 3.5);
-    const rank = Math.round(4.5 - z);
-    return (String.fromCharCode('a'.charCodeAt(0) + fileIndex) + rank) as Key;
-  }
 
   function getPieceMeshFromObject(object: THREE.Object3D | null): THREE.Mesh | null {
     let current: THREE.Object3D | null = object;

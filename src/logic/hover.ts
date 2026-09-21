@@ -61,7 +61,7 @@ export function createPieceHoverController(
   const squareHighlight = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({
-      color: 0xf7_e2_7f,
+      color: '#f7e27f',
       transparent: true,
       opacity: 0.35,
       depthWrite: false,

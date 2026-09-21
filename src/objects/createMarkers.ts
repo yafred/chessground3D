@@ -63,7 +63,7 @@ export function createPremoveHighlightMarker(isDestination: boolean) {
   const marker = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({
-      color: 0xf0_7d_1e,
+      color: '#f07d1e',
       transparent: true,
       opacity: isDestination ? 0.4 : 0.35,
       depthWrite: false,

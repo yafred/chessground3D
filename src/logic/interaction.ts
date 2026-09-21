@@ -74,7 +74,7 @@ export function setupPieceInteraction({
   const lastMoveFromHighlight = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({
-      color: 0xff_e4_5c,
+      color: '#ffe45c',
       transparent: true,
       opacity: 0.35,
       depthWrite: false,
@@ -84,7 +84,7 @@ export function setupPieceInteraction({
   const lastMoveToHighlight = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({
-      color: 0xff_e4_5c,
+      color: '#ffe45c',
       transparent: true,
       opacity: 0.4,
       depthWrite: false,

@@ -7,8 +7,7 @@ import { createPremoveHighlightMarker } from '../objects/createMarkers';
 
 import { type PieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
-
-const pieceCodes = new Set(['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p']);
+import { pieceCodes } from './util.js';
 
 type DragState = {
   piece: THREE.Mesh;

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 import { createMoveDestinationHighlightMarker } from '../objects/createMarkers.js';
 
-const pieceCodes = new Set(['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p']);
+import { pieceCodes } from './util.js';
 
 function getSquareCoordinate(value: number): number {
   return Math.round(value + 3.5) - 3.5;

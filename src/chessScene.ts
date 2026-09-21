@@ -11,6 +11,7 @@ import { createPieceHoverController } from './logic/hover.js';
 import { setupPieceInteraction } from './logic/interaction.js';
 import { applyInteractionPolicy } from './logic/interactionPolicy.js';
 import { setupMoveAttemptAdapter } from './logic/moveAttemptAdapter.js';
+import { pieceCodes } from './logic/util.js';
 import { createA1Marker, createCheckHighlightMarker, createH8Marker } from './objects/createMarkers.js';
 import { piecesToScene } from './objects/createPieces.js';
 import { createPieceTemplates } from './objects/createPieceTemplates.js';
@@ -21,8 +22,6 @@ import { createScene } from './scene/createScene.js';
 import { createControls, getWhiteAzimuthAngle, setControlsOrientation } from './systems/controls.js';
 import { registerSceneRenderStep } from './systems/renderScheduler.js';
 import { handleResize } from './systems/resize.js';
-
-const pieceCodes = new Set(['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p']);
 
 const SCENE_ASSET_URL = new URL('/assets/scene.glb', window.location.origin).href; // hardcoded for lila
 

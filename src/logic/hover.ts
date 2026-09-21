@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
-const pieceCodes = new Set(['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p']);
+import { pieceCodes } from './util.js';
+
 const hoverHighlightColor = new THREE.Color(0x8f_d3_ff);
 const pinnedHighlightColor = new THREE.Color(0x2f_6f_ff);
 

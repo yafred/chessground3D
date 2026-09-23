@@ -63,6 +63,8 @@ export function createChessScene(sceneRoot: HTMLElement, state: State): ChessSce
   let isDestroyed = false;
   let currentOrientation: Color | undefined;
 
+  // At the moment, orientation is defined by the position of the camera relative to the board.
+  // It would be better to reposition the pieces based on the orientation rather than moving the camera.
   const whiteAzimuthAngle = getWhiteAzimuthAngle(controls);
   function setOrientation(orientation: Color | undefined) {
     if (!orientation || orientation === currentOrientation) {

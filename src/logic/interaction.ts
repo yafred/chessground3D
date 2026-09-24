@@ -777,11 +777,8 @@ export function setupPieceInteraction({
   renderer.domElement.addEventListener(
     'pointerdown',
     event => {
-      if (!interactionEnabled) {
-        return;
-      }
-
-      if (event.button !== 0) {
+      // we just handle left-click interactions
+      if (event.button !== 0 || !interactionEnabled) {
         return;
       }
 
@@ -886,11 +883,8 @@ export function setupPieceInteraction({
   });
 
   renderer.domElement.addEventListener('pointerup', event => {
-    if (!interactionEnabled) {
-      return;
-    }
-
-    if (event.button !== 0) {
+    // we just handle left-click interactions
+    if (event.button !== 0 || !interactionEnabled) {
       return;
     }
 

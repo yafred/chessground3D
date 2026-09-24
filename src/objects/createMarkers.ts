@@ -76,3 +76,29 @@ export function createPremoveHighlightMarker(isDestination: boolean) {
   marker.renderOrder = isDestination ? 11 : 10;
   return marker;
 }
+
+export function createLastMoveFromHighlightMarker() {
+  return new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({
+      color: '#ffe45c',
+      transparent: true,
+      opacity: 0.35,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+}
+
+export function createLastMoveToHighlightMarker() {
+  return new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({
+      color: '#ffe45c',
+      transparent: true,
+      opacity: 0.4,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+}

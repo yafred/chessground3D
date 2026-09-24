@@ -2,7 +2,11 @@ import { type Color, type Key } from '@lichess-org/chessground/types';
 import * as THREE from 'three';
 import { type OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-import { createPremoveHighlightMarker } from '../objects/createMarkers';
+import {
+  createLastMoveFromHighlightMarker,
+  createLastMoveToHighlightMarker,
+  createPremoveHighlightMarker,
+} from '../objects/createMarkers';
 
 import { type PieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
@@ -71,26 +75,8 @@ export function setupPieceInteraction({
   const boardPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const boardPoint = new THREE.Vector3();
   const dragThresholdPx = 4;
-  const lastMoveFromHighlight = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({
-      color: '#ffe45c',
-      transparent: true,
-      opacity: 0.35,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    }),
-  );
-  const lastMoveToHighlight = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({
-      color: '#ffe45c',
-      transparent: true,
-      opacity: 0.4,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    }),
-  );
+  const lastMoveFromHighlight = createLastMoveFromHighlightMarker();
+  const lastMoveToHighlight = createLastMoveToHighlightMarker();
   const premoveFromHighlight = createPremoveHighlightMarker(false);
   const premoveToHighlight = createPremoveHighlightMarker(true);
   const selectableMoveHighlights = new THREE.Group();

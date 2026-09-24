@@ -142,10 +142,11 @@ export function setupPieceInteraction({
     return null;
   }
 
-  function updatePointerNdc(event: PointerEvent) {
+  function pointerNdcFromEvent(event: PointerEvent, out: THREE.Vector2 = new THREE.Vector2()): THREE.Vector2 {
     const rect = renderer.domElement.getBoundingClientRect();
-    pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    pointerNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    out.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    out.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    return out;
   }
 
   function getSquareCoordinate(value: number): number {
@@ -267,8 +268,7 @@ export function setupPieceInteraction({
   }
 
   function getPieceUnderPointer(event: PointerEvent): THREE.Mesh | null {
-    updatePointerNdc(event);
-    pointerRaycaster.setFromCamera(pointerNdc, camera);
+    pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
     const hits = pointerRaycaster.intersectObjects(scene.children, true);
     for (const hit of hits) {
       const piece = getPieceMeshFromObject(hit.object);
@@ -647,8 +647,7 @@ export function setupPieceInteraction({
       return false;
     }
 
-    updatePointerNdc(event);
-    pointerRaycaster.setFromCamera(pointerNdc, camera);
+    pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
 
     const targetPiece = getPieceUnderPointer(event);
     if (targetPiece) {
@@ -696,8 +695,7 @@ export function setupPieceInteraction({
       return;
     }
 
-    updatePointerNdc(event);
-    pointerRaycaster.setFromCamera(pointerNdc, camera);
+    pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
     const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
     if (
       !hasBoardIntersection ||
@@ -740,8 +738,7 @@ export function setupPieceInteraction({
       return;
     }
 
-    updatePointerNdc(event);
-    pointerRaycaster.setFromCamera(pointerNdc, camera);
+    pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
     const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
 
     let dropApplied = false;
@@ -825,8 +822,7 @@ export function setupPieceInteraction({
 
       event.stopPropagation();
 
-      updatePointerNdc(event);
-      pointerRaycaster.setFromCamera(pointerNdc, camera);
+      pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
       const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
       const pointerOffsetX = hasBoardIntersection ? piece.position.x - boardPoint.x : 0;
       const pointerOffsetZ = hasBoardIntersection ? piece.position.z - boardPoint.z : 0;

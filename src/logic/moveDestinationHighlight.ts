@@ -1,9 +1,9 @@
 import { type Key } from '@lichess-org/chessground/types';
 import type * as THREE from 'three';
 
-import { createMoveDestinationHighlightMarker } from '../objects/createMarkers.js';
+import { createMoveDestinationHighlightMarker } from '../objects/createMarkers';
 
-import { coordinatesToSquare, getPieceAtSquare, parseSquare } from './util.js';
+import { coordinatesToSquare, getPieceAtSquare, parseSquare } from './util';
 
 function getSquareCoordinate(value: number): number {
   return Math.round(value + 3.5) - 3.5;

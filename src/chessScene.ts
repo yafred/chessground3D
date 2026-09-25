@@ -5,23 +5,23 @@ import { type State } from '@lichess-org/chessground/state';
 import { type Color, type Key } from '@lichess-org/chessground/types';
 import * as THREE from 'three';
 
-import { updateAutoShapes } from './logic/autoShapes.js';
-import { updateCheckHighlight } from './logic/checkHighlight.js';
-import { createPieceHoverController } from './logic/hover.js';
-import { setupPieceInteraction } from './logic/interaction.js';
-import { applyInteractionPolicy } from './logic/interactionPolicy.js';
-import { setupMoveAttemptAdapter } from './logic/moveAttemptAdapter.js';
-import { coordinatesToSquare, pieceCodes } from './logic/util.js';
-import { createA1Marker, createCheckHighlightMarker, createH8Marker } from './objects/createMarkers.js';
-import { piecesToScene } from './objects/createPieces.js';
-import { createPieceTemplates } from './objects/createPieceTemplates.js';
-import { createCamera } from './scene/createCamera.js';
-import { createLights } from './scene/createLights.js';
-import { createRenderer } from './scene/createRenderer.js';
-import { createScene } from './scene/createScene.js';
-import { createControls, getWhiteAzimuthAngle, setControlsOrientation } from './systems/controls.js';
-import { registerSceneRenderStep } from './systems/renderScheduler.js';
-import { handleResize } from './systems/resize.js';
+import { updateAutoShapes } from './logic/autoShapes';
+import { updateCheckHighlight } from './logic/checkHighlight';
+import { createPieceHoverController } from './logic/hover';
+import { setupPieceInteraction } from './logic/interaction';
+import { applyInteractionPolicy } from './logic/interactionPolicy';
+import { setupMoveAttemptAdapter } from './logic/moveAttemptAdapter';
+import { coordinatesToSquare, pieceCodes } from './logic/util';
+import { createA1Marker, createCheckHighlightMarker, createH8Marker } from './objects/createMarkers';
+import { piecesToScene } from './objects/createPieces';
+import { createPieceTemplates } from './objects/createPieceTemplates';
+import { createCamera } from './scene/createCamera';
+import { createLights } from './scene/createLights';
+import { createRenderer } from './scene/createRenderer';
+import { createScene } from './scene/createScene';
+import { createControls, getWhiteAzimuthAngle, setControlsOrientation } from './systems/controls';
+import { registerSceneRenderStep } from './systems/renderScheduler';
+import { handleResize } from './systems/resize';
 
 const SCENE_ASSET_URL = new URL('/assets/scene.glb', window.location.origin).href; // hardcoded for lila
 

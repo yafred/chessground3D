@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { getPieceAtSquare, pieceCodes } from './util.js';
+import { getPieceAtSquare, pieceCodes } from './util';
 
 const hoverHighlightColor = new THREE.Color('#8fd3ff');
 const pinnedHighlightColor = new THREE.Color('#2f6fff');

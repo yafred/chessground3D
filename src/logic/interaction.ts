@@ -10,7 +10,7 @@ import {
 
 import { type PieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
-import { coordinatesToSquare, getPieceAtSquare, keyToCoordinates, parseSquare, pieceCodes } from './util.js';
+import { coordinatesToSquare, getPieceAtSquare, keyToCoordinates, parseSquare, pieceCodes } from './util';
 
 type DragState = {
   piece: THREE.Mesh;

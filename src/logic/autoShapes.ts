@@ -1,9 +1,9 @@
 import { type DrawBrushes, type DrawShape } from '@lichess-org/chessground/draw';
 import * as THREE from 'three';
 
-import { createArrowMesh, createCustomSvgMesh } from '../objects/createAutoShapes.js';
+import { createArrowMesh, createCustomSvgMesh } from '../objects/createAutoShapes';
 
-import { keyToCoordinates } from './util.js';
+import { keyToCoordinates } from './util';
 
 export function clearAutoShapes(group: THREE.Group) {
   for (const child of group.children) {

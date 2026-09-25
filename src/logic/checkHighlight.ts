@@ -1,7 +1,7 @@
 import { type Key } from '@lichess-org/chessground/types';
 import type * as THREE from 'three';
 
-import { keyToCoordinates } from './util.js';
+import { keyToCoordinates } from './util';
 
 export function updateCheckHighlight(marker: THREE.Mesh, square: Key | undefined, highlightCheck: boolean) {
   const checkedSquare = square ? keyToCoordinates(square) : undefined;

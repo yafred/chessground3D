@@ -5,7 +5,6 @@ import { type PiecesDiff } from '@lichess-org/chessground/types';
 import { opposite } from '@lichess-org/chessground/util';
 
 import { createChessScene } from './chessScene';
-import { dragNewPiece } from './logic/drag';
 
 export function Chessground(element: HTMLElement, config?: Config): Api {
   function notImplemented(name: string): () => void;
@@ -85,7 +84,7 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
     },
     dragNewPiece(piece, event, force) {
       cancelNewPieceDrag?.();
-      cancelNewPieceDrag = dragNewPiece(state, scene, piece, event, force);
+      cancelNewPieceDrag = scene.dragNewPiece(piece, event, force);
     },
     redrawAll: notImplemented('redrawAll'),
     playPremove() {

@@ -46,6 +46,7 @@
   },
   "files": [
     "dist",
+    "dist/**/*.js",
     "/assets/*.glb",
     "/src/**/*.ts"
   ],

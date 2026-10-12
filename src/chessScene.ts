@@ -70,7 +70,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
   board.add(predropHighlight);
   board.add(systemShapesGroup);
   board.add(userShapesGroup);
-  const stopHandlingResize = handleResize(htmlElement, camera, renderer);
+  const stopHandlingResize = handleResize(htmlElement, camera, renderer, state.addDimensionsCssVarsTo);
 
   let materialTemplates = new Map<string, THREE.Material>();
   let pieceTemplates = new Map<string, THREE.Mesh>();

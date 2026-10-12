@@ -10,7 +10,7 @@ import { dragNewPiece, registerScene, unregisterScene } from './drag';
 
 export function Chessground(element: HTMLElement, config?: Config): Api {
   // temporary hack to allow a 2D view
-  if (window.localStorage.getItem('chessground3d') !== 'true') {
+  if (window.localStorage.getItem('chessground3d') === 'false') {
     return Chessground2D(element, config);
   }
 

@@ -50,9 +50,9 @@
     "/assets/*.glb",
     "/src/**/*.ts"
   ],
-  "packageManager": "pnpm@11.22.0",
+  "packageManager": "pnpm@12.9.0",
   "engines": {
-    "node": ">=22",
-    "pnpm": "11"
+    "node": ">=24",
+    "pnpm": ">=12"
   }
 }

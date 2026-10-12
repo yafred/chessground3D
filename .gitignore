@@ -1,6 +1,7 @@
 .pnpm-store/
 node_modules/
 dist/
+.devenv
 
 /*.js
 /*.d.ts

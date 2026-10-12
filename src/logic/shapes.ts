@@ -107,5 +107,7 @@ export function updateMeshesFromShapes(
   }
 
   group.clear();
-  group.add(...next);
+  if (next.length > 0) {
+    group.add(...next);
+  }
 }

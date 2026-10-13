@@ -283,6 +283,29 @@ export function setupPieceInteraction({
     return getPieceHitUnderPointer(event)?.piece ?? null;
   }
 
+  function getSquareKeyUnderPointer(event: PointerEvent): Key | null {
+    const targetPiece = getPieceUnderPointer(event);
+    if (targetPiece) {
+      return coordinatesToSquare(
+        getSquareCoordinate(targetPiece.position.x),
+        getSquareCoordinate(targetPiece.position.z),
+      );
+    }
+
+    pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
+    const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
+    if (!hasBoardIntersection) {
+      return null;
+    }
+
+    board.worldToLocal(boardPoint);
+    if (!isWithinBoard(boardPoint.x, boardPoint.z)) {
+      return null;
+    }
+
+    return coordinatesToSquare(getSquareCoordinate(boardPoint.x), getSquareCoordinate(boardPoint.z));
+  }
+
   function clearSelection() {
     selectedPiece = null;
     clearSelectableMoveHighlights();
@@ -626,25 +649,8 @@ export function setupPieceInteraction({
         return;
       }
 
-      if (targetPiece && isOppositeColor(selectedPiece, targetPiece)) {
-        if (attemptInteractionMove(selectedPiece, coords.x, coords.z)) {
-          clearSelection();
-          return;
-        }
-      }
-
-      if (targetPiece && canInteractWithPiece(targetPiece)) {
-        selectPiece(targetPiece);
-        return;
-      }
-
-      if (!targetPiece) {
-        if (attemptInteractionMove(selectedPiece, coords.x, coords.z)) {
-          clearSelection();
-          return;
-        }
-      }
-
+      attemptInteractionMove(selectedPiece, coords.x, coords.z);
+      clearSelection();
       return;
     }
 
@@ -658,49 +664,12 @@ export function setupPieceInteraction({
       return false;
     }
 
-    pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
-
-    const targetPiece = getPieceUnderPointer(event);
-    if (targetPiece) {
-      if (targetPiece === selectedPiece) {
-        if (isQueuedPremoveOrigin(targetPiece)) {
-          cancelQueuedPremove();
-        }
-        clearSelection();
-        return true;
-      }
-
-      if (isOppositeColor(selectedPiece, targetPiece)) {
-        const targetX = targetPiece.position.x;
-        const targetZ = targetPiece.position.z;
-        if (attemptInteractionMove(selectedPiece, targetX, targetZ)) {
-          clearSelection();
-          return true;
-        }
-      }
-
-      if (!canInteractWithPiece(targetPiece)) {
-        return true;
-      }
-
-      selectPiece(targetPiece);
-      return true;
-    }
-
-    const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
-    if (hasBoardIntersection) {
-      board.worldToLocal(boardPoint);
-    }
-    if (!hasBoardIntersection || !isWithinBoard(boardPoint.x, boardPoint.z)) {
+    const key = getSquareKeyUnderPointer(event);
+    if (!key) {
       return false;
     }
 
-    const targetX = getSquareCoordinate(boardPoint.x);
-    const targetZ = getSquareCoordinate(boardPoint.z);
-    if (attemptInteractionMove(selectedPiece, targetX, targetZ)) {
-      clearSelection();
-    }
-
+    selectSquare(key);
     return true;
   }
 
@@ -877,6 +846,16 @@ export function setupPieceInteraction({
       }
       const { piece } = pieceHit;
 
+      if (selectedPiece && piece !== selectedPiece) {
+        event.stopPropagation();
+        clickState = {
+          pointerId: event.pointerId,
+          startClientX: event.clientX,
+          startClientY: event.clientY,
+        };
+        return;
+      }
+
       if (!canInteractWithPiece(piece)) {
         return;
       }
@@ -888,24 +867,6 @@ export function setupPieceInteraction({
           startClientX: event.clientX,
           startClientY: event.clientY,
         };
-        return;
-      }
-
-      // If a piece is pinned, clicking another piece should act as a click target,
-      // not start a drag on the clicked piece.
-      if (selectedPiece && piece !== selectedPiece) {
-        event.stopPropagation();
-
-        if (isOppositeColor(selectedPiece, piece)) {
-          const targetX = piece.position.x;
-          const targetZ = piece.position.z;
-          if (attemptInteractionMove(selectedPiece, targetX, targetZ)) {
-            clearSelection();
-            return;
-          }
-        }
-
-        selectPiece(piece);
         return;
       }
 
@@ -1087,9 +1048,9 @@ export function setupPieceInteraction({
 
     if (selectable) {
       if (!selectedPiece) {
-        const piece = getPieceUnderPointer(event);
-        if (piece && canInteractWithPiece(piece)) {
-          selectPiece(piece);
+        const key = getSquareKeyUnderPointer(event);
+        if (key) {
+          selectSquare(key);
         }
       } else {
         handleSelectedPieceClickTarget(event);

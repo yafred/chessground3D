@@ -23,7 +23,9 @@ allowBuilds:
   chessground3D@https://codeload.github.com/yafred/chessground3D/tar.gz/<commit_id>: true
 ```
 
-commit_id has to match pnpm-lock.yaml
+```bash
+pnpm update chessground3D
+```
 
 ```yaml
 chessground3D:

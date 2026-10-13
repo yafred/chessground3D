@@ -100,7 +100,6 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     board,
     camera,
     renderer,
-    controls,
     hoverController,
   });
   interactionController.setUserShapesGroup(userShapesGroup);

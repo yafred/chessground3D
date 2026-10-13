@@ -48,6 +48,7 @@ function saveView(camera: THREE.Camera, controls: OrbitControls) {
 
 export function createControls(camera: THREE.Camera, domElement: HTMLElement) {
   const controls = new OrbitControls(camera, domElement);
+  controls.enabled = false;
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
 

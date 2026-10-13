@@ -1,7 +1,6 @@
 import { type State } from '@lichess-org/chessground/state';
 import { type Color, type Key } from '@lichess-org/chessground/types';
 import * as THREE from 'three';
-import { type OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import {
   createLastMoveFromHighlightMarker,
@@ -48,7 +47,6 @@ type SetupPieceInteractionParams = {
   board: THREE.Group;
   camera: THREE.Camera;
   renderer: THREE.WebGLRenderer;
-  controls: OrbitControls;
   hoverController: PieceHoverController;
 };
 
@@ -80,7 +78,6 @@ export function setupPieceInteraction({
   board,
   camera,
   renderer,
-  controls,
   hoverController,
 }: SetupPieceInteractionParams): PieceInteractionController {
   const pointerRaycaster = new THREE.Raycaster();
@@ -539,7 +536,6 @@ export function setupPieceInteraction({
       renderer.domElement.style.cursor = '';
       clearSelection();
       hoverController.setEnabled(false);
-      controls.enabled = true;
       return;
     }
 
@@ -572,7 +568,6 @@ export function setupPieceInteraction({
       }
       dragState = null;
       renderer.domElement.style.cursor = '';
-      controls.enabled = true;
       hoverController.setEnabled(true);
     }
   }
@@ -735,7 +730,6 @@ export function setupPieceInteraction({
       dragState = null;
       hoverController.setDraggedPiece(null);
       hoverController.setIgnoredPiece(null);
-      controls.enabled = true;
       hoverController.setEnabled(true);
 
       if (selectedPiece === piece) {
@@ -780,7 +774,6 @@ export function setupPieceInteraction({
     clearSelection();
     dragState = null;
     hoverController.setIgnoredPiece(null);
-    controls.enabled = true;
     hoverController.setEnabled(true);
 
     if (renderer.domElement.hasPointerCapture(event.pointerId)) {
@@ -887,7 +880,6 @@ export function setupPieceInteraction({
         dragPlane: new THREE.Plane(new THREE.Vector3(0, 1, 0), -pieceHit.point.y),
         hasMoved: false,
       };
-      controls.enabled = false;
       hoverController.setIgnoredPiece(piece);
       hoverController.updateFromPointerEvent(event);
       renderer.domElement.setPointerCapture(event.pointerId);

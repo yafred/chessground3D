@@ -33,6 +33,7 @@ type DragState = {
   startClientY: number;
   pointerOffsetX: number;
   pointerOffsetZ: number;
+  dragPlane: THREE.Plane;
   hasMoved: boolean;
 };
 
@@ -267,17 +268,21 @@ export function setupPieceInteraction({
     setLastMoveHighlights(from.x, from.z, to.x, to.z);
   }
 
-  function getPieceUnderPointer(event: PointerEvent): THREE.Mesh | null {
+  function getPieceHitUnderPointer(event: PointerEvent): { piece: THREE.Mesh; point: THREE.Vector3 } | null {
     pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
     const hits = pointerRaycaster.intersectObjects(scene.children, true);
     for (const hit of hits) {
       const piece = getPieceMeshFromObject(hit.object);
       if (piece) {
-        return piece;
+        return { piece, point: hit.point };
       }
     }
 
     return null;
+  }
+
+  function getPieceUnderPointer(event: PointerEvent): THREE.Mesh | null {
+    return getPieceHitUnderPointer(event)?.piece ?? null;
   }
 
   function clearSelection() {
@@ -718,7 +723,8 @@ export function setupPieceInteraction({
     }
 
     pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
-    const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
+    const hasBoardIntersection =
+      pointerRaycaster.ray.intersectPlane(dragState.dragPlane, boardPoint) !== null;
     if (hasBoardIntersection) {
       board.worldToLocal(boardPoint);
     }
@@ -732,7 +738,7 @@ export function setupPieceInteraction({
 
     dragState.piece.position.x = boardPoint.x + dragState.pointerOffsetX;
     dragState.piece.position.z = boardPoint.z + dragState.pointerOffsetZ;
-    dragState.piece.position.y = dragState.startPosition.y + 0.2;
+    dragState.piece.position.y = dragState.startPosition.y;
 
     const hoveredPiece = getPieceAtSquare(
       scene,
@@ -781,7 +787,8 @@ export function setupPieceInteraction({
     }
 
     pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
-    const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
+    const hasBoardIntersection =
+      pointerRaycaster.ray.intersectPlane(dragState.dragPlane, boardPoint) !== null;
     if (hasBoardIntersection) {
       board.worldToLocal(boardPoint);
     }
@@ -864,14 +871,15 @@ export function setupPieceInteraction({
       }
       state?.drawable?.onChange?.(state.drawable.shapes);
 
-      const piece = getPieceUnderPointer(event);
-      if (!piece) {
+      const pieceHit = getPieceHitUnderPointer(event);
+      if (!pieceHit) {
         if (selectedPiece) {
           event.preventDefault();
           event.stopPropagation();
         }
         return;
       }
+      const { piece } = pieceHit;
 
       if (!canInteractWithPiece(piece)) {
         return;
@@ -906,8 +914,10 @@ export function setupPieceInteraction({
       }
 
       event.stopPropagation();
-      const pointerOffsetX = hasBoardIntersection ? piece.position.x - boardPoint.x : 0;
-      const pointerOffsetZ = hasBoardIntersection ? piece.position.z - boardPoint.z : 0;
+      const grabPoint = pieceHit.point.clone();
+      board.worldToLocal(grabPoint);
+      const pointerOffsetX = piece.position.x - grabPoint.x;
+      const pointerOffsetZ = piece.position.z - grabPoint.z;
 
       dragState = {
         piece,
@@ -917,6 +927,7 @@ export function setupPieceInteraction({
         startClientY: event.clientY,
         pointerOffsetX,
         pointerOffsetZ,
+        dragPlane: new THREE.Plane(new THREE.Vector3(0, 1, 0), -pieceHit.point.y),
         hasMoved: false,
       };
       controls.enabled = false;

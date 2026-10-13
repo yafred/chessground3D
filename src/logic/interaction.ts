@@ -170,8 +170,6 @@ export function setupPieceInteraction({
     return isWhitePiece(piece) ? allowWhiteInteraction : allowBlackInteraction;
   }
 
-  hoverController.setPieceHighlightFilter(canInteractWithPiece);
-
   function coordinatesToUci(fromX: number, fromZ: number, toX: number, toZ: number): string {
     // Convert board coordinates to square notation (a1-h8)
     return coordinatesToSquare(fromX, fromZ) + coordinatesToSquare(toX, toZ);
@@ -287,7 +285,6 @@ export function setupPieceInteraction({
 
   function clearSelection() {
     selectedPiece = null;
-    hoverController.setPinnedPiece(null);
     clearSelectableMoveHighlights();
   }
 
@@ -316,7 +313,6 @@ export function setupPieceInteraction({
     }
 
     selectedPiece = piece;
-    hoverController.setPinnedPiece(piece);
     showSelectableMoveHighlights(piece);
   }
 
@@ -529,7 +525,6 @@ export function setupPieceInteraction({
 
   function setAllowWhiteInteraction(allow: boolean) {
     allowWhiteInteraction = allow;
-    hoverController.setPieceHighlightFilter(canInteractWithPiece);
     if (selectedPiece && !canInteractWithPiece(selectedPiece)) {
       clearSelection();
     }
@@ -537,7 +532,6 @@ export function setupPieceInteraction({
 
   function setAllowBlackInteraction(allow: boolean) {
     allowBlackInteraction = allow;
-    hoverController.setPieceHighlightFilter(canInteractWithPiece);
     if (selectedPiece && !canInteractWithPiece(selectedPiece)) {
       clearSelection();
     }
@@ -933,7 +927,6 @@ export function setupPieceInteraction({
         hasMoved: false,
       };
       controls.enabled = false;
-      hoverController.setPinnedPiece(piece);
       hoverController.setIgnoredPiece(piece);
       hoverController.updateFromPointerEvent(event);
       renderer.domElement.setPointerCapture(event.pointerId);

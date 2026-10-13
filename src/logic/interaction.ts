@@ -517,6 +517,7 @@ export function setupPieceInteraction({
         }
         dragState = null;
       }
+      renderer.domElement.style.cursor = '';
       clearSelection();
       hoverController.setEnabled(false);
       controls.enabled = true;
@@ -553,6 +554,7 @@ export function setupPieceInteraction({
         renderer.domElement.releasePointerCapture(dragState.pointerId);
       }
       dragState = null;
+      renderer.domElement.style.cursor = '';
       controls.enabled = true;
       hoverController.setEnabled(true);
     }
@@ -935,9 +937,20 @@ export function setupPieceInteraction({
       hoverController.setIgnoredPiece(piece);
       hoverController.updateFromPointerEvent(event);
       renderer.domElement.setPointerCapture(event.pointerId);
+      updateCursor(event);
     },
     { capture: true },
   );
+
+  // hand cursor while hovering a movable piece, and for the whole drag even when the pointer leaves it
+  function updateCursor(event: PointerEvent) {
+    const piece = !dragState && interactionEnabled ? getPieceUnderPointer(event) : null;
+    renderer.domElement.style.cursor = dragState
+      ? 'grabbing'
+      : piece && canInteractWithPiece(piece)
+        ? 'pointer'
+        : '';
+  }
 
   function handleDraw(event: PointerEvent) {
     if (drawState && event.pointerId === drawState.pointerId) {
@@ -979,6 +992,8 @@ export function setupPieceInteraction({
     if (!interactionEnabled) {
       return;
     }
+
+    updateCursor(event);
 
     if (drawState && event.pointerId === drawState.pointerId) {
       handleDraw(event);
@@ -1089,6 +1104,8 @@ export function setupPieceInteraction({
     }
   });
 
+  renderer.domElement.addEventListener('pointerup', updateCursor);
+
   renderer.domElement.addEventListener('pointercancel', event => {
     if (clickState?.pointerId === event.pointerId) {
       clickState = null;
@@ -1099,6 +1116,13 @@ export function setupPieceInteraction({
     }
 
     finishDrag(event);
+    updateCursor(event);
+  });
+
+  renderer.domElement.addEventListener('pointerleave', () => {
+    if (!dragState) {
+      renderer.domElement.style.cursor = '';
+    }
   });
 
   // right-click cancels a queued premove, mirroring lichess's board behavior

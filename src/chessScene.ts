@@ -250,7 +250,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     },
 
     move(from, to) {
-      interactionController.moveProgrammaticallyBySquare(from, to);
+      interactionController.moveProgrammaticallyBySquare(from, to, state);
     },
 
     selectSquare(key) {

@@ -1,5 +1,5 @@
 import { type State } from '@lichess-org/chessground/state';
-import { type Color, type Key } from '@lichess-org/chessground/types';
+import { type Color, type Key, type Piece } from '@lichess-org/chessground/types';
 import * as THREE from 'three';
 
 import {
@@ -13,6 +13,15 @@ import { type PieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
 import { disposeShape, updateMeshesFromShapes } from './shapes.js';
 import { coordinatesToSquare, getPieceAtSquare, keyToCoordinates, pieceCodes } from './util';
+
+const pieceRoleByCode: Record<string, Piece['role']> = {
+  p: 'pawn',
+  n: 'knight',
+  b: 'bishop',
+  r: 'rook',
+  q: 'queen',
+  k: 'king',
+};
 
 type DrawState = {
   pointerId: number;
@@ -50,8 +59,13 @@ type SetupPieceInteractionParams = {
   hoverController: PieceHoverController;
 };
 
+type MoveResult = {
+  success: boolean;
+  capture?: Piece;
+};
+
 export type PieceInteractionController = {
-  moveProgrammaticallyBySquare: (from: Key, to: Key) => boolean;
+  moveProgrammaticallyBySquare: (from: Key, to: Key, state: State) => boolean;
   selectSquare: (key: Key | null) => void;
   setLastMoveSquares: (squares?: readonly Key[]) => void;
   setAllowedMoveDests: (dests?: Map<Key, readonly Key[]>, showDests?: boolean) => void;
@@ -157,6 +171,15 @@ export function setupPieceInteraction({
 
   function isWhitePiece(piece: THREE.Mesh): boolean {
     return piece.name === piece.name.toUpperCase();
+  }
+
+  function pieceFromMesh(piece: THREE.Mesh): Piece {
+    const role = pieceRoleByCode[piece.name.toLowerCase()];
+    if (!role) {
+      throw new Error(`Unknown piece code: ${piece.name}`);
+    }
+
+    return { role, color: isWhitePiece(piece) ? 'white' : 'black' };
   }
 
   function isOppositeColor(a: THREE.Mesh, b: THREE.Mesh): boolean {
@@ -345,14 +368,14 @@ export function setupPieceInteraction({
     validateWithCallback = true,
     triggerMoveCallback = true,
     isPremove = false,
-  ): boolean {
+  ): MoveResult {
     // Validate move through callback if provided
     if (validateWithCallback && onMoveAttempt) {
       const normalizedFromX = getSquareCoordinate(fromX);
       const normalizedFromZ = getSquareCoordinate(fromZ);
       const uci = coordinatesToUci(normalizedFromX, normalizedFromZ, targetX, targetZ);
       if (!onMoveAttempt(uci)) {
-        return false; // Move rejected by validation callback
+        return { success: false }; // Move rejected by validation callback
       }
     }
 
@@ -371,11 +394,11 @@ export function setupPieceInteraction({
           isPremove,
         );
       }
-      return true;
+      return { success: true };
     }
 
     if (!isOppositeColor(movingPiece, occupyingPiece)) {
-      return false;
+      return { success: false };
     }
 
     occupyingPiece.removeFromParent();
@@ -388,7 +411,8 @@ export function setupPieceInteraction({
         isPremove,
       );
     }
-    return true;
+
+    return { success: true, capture: pieceFromMesh(occupyingPiece) };
   }
 
   // Routes a user-initiated move: plays it immediately if it's the piece's turn,
@@ -401,7 +425,7 @@ export function setupPieceInteraction({
     fromZ = piece.position.z,
   ): boolean {
     if (!isPremoveCandidate(piece)) {
-      return applyMoveOrCapture(piece, targetX, targetZ, fromX, fromZ);
+      return applyMoveOrCapture(piece, targetX, targetZ, fromX, fromZ).success;
     }
 
     const fromSquareX = getSquareCoordinate(fromX);
@@ -516,7 +540,7 @@ export function setupPieceInteraction({
       true,
       true,
       true,
-    );
+    ).success;
   }
 
   function setInteractionEnabled(enabled: boolean) {
@@ -584,9 +608,9 @@ export function setupPieceInteraction({
     fromZ: number,
     toX: number,
     toZ: number,
-  ): boolean {
+  ): MoveResult {
     if (dragState) {
-      return false;
+      return { success: false };
     }
 
     const sourceX = getSquareCoordinate(fromX);
@@ -594,31 +618,35 @@ export function setupPieceInteraction({
     const targetX = getSquareCoordinate(toX);
     const targetZ = getSquareCoordinate(toZ);
     if (!isWithinBoard(sourceX, sourceZ) || !isWithinBoard(targetX, targetZ)) {
-      return false;
+      return { success: false };
     }
 
     const movingPiece = getPieceAtSquare(scene, sourceX, sourceZ);
     if (!movingPiece) {
-      return false;
+      return { success: false };
     }
 
     const moved = applyMoveOrCapture(movingPiece, targetX, targetZ, sourceX, sourceZ, false, false);
-    if (!moved) {
-      return false;
+    if (moved.success) {
+      clearSelection();
     }
 
-    clearSelection();
-    return true;
+    return moved;
   }
 
-  function moveProgrammaticallyBySquare(from: Key, to: Key): boolean {
+  function moveProgrammaticallyBySquare(from: Key, to: Key, state: State): boolean {
     const source = keyToCoordinates(from);
     const target = keyToCoordinates(to);
     if (!source || !target) {
       return false;
     }
 
-    return moveProgrammaticallyByCoordinates(source.x, source.z, target.x, target.z);
+    const moveResult = moveProgrammaticallyByCoordinates(source.x, source.z, target.x, target.z);
+
+    if (moveResult.success) {
+      state.events.move?.(from, to, moveResult.capture);
+    }
+    return moveResult.success;
   }
 
   function selectSquare(key: Key | null) {

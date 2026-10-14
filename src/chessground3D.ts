@@ -52,18 +52,18 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
     state,
 
     set(config) {
-      //console.log('Applying new configuration:', config);
+      console.log('Applying new configuration:', config);
       configure(state, config);
       scene.set(state, 'fen' in config);
     },
 
     getFen() {
-      //console.log('Getting FEN from the scene.');
+      console.log('Getting FEN from the scene.');
       return scene.getFen();
     },
 
     toggleOrientation() {
-      //console.log('Toggling board orientation.');
+      console.log('Toggling board orientation.');
       state.orientation = opposite(state.orientation);
       state.animation.current = state.draggable.current = state.selected = undefined;
       scene.selectSquare(null);
@@ -71,12 +71,12 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
     },
 
     move(orig, dest) {
-      //console.log(`Moving piece from ${orig} to ${dest}.`);
+      console.log(`Moving piece from ${orig} to ${dest}.`);
       scene.move(orig, dest);
     },
 
     setPieces(pieces: PiecesDiff) {
-      //console.log('Setting pieces:', pieces);
+      console.log('Setting pieces:', pieces);
       for (const [key, piece] of pieces) {
         if (piece) {
           state.pieces.set(key, piece);
@@ -88,24 +88,24 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
     },
 
     selectSquare(key, force): void {
-      //console.log(`Selecting square: ${key}, force: ${force}`);
+      console.log(`Selecting square: ${key}, force: ${force}`);
       scene.selectSquare(key);
     },
 
     newPiece(piece: Piece, key: Key): void {
-      //console.log(`Adding new piece ${piece} at ${key}.`);
+      console.log(`Adding new piece ${piece} at ${key}.`);
     },
 
     cancelMove(): void {
-      //console.log('Cancelling move.');
+      console.log('Cancelling move.');
     },
 
     stop(): void {
-      //console.log('Stopping the scene.');
+      console.log('Stopping the scene.');
     },
 
     explode(keys: Key[]): void {
-      //console.log('Exploding keys:', keys);
+      console.log('Exploding keys:', keys);
       let changed = false;
       for (const key of keys) {
         changed = state.pieces.delete(key) || changed;
@@ -117,37 +117,37 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
     },
 
     setShapes(shapes) {
-      //console.log('Setting user shapes:', shapes);
+      console.log('Setting user shapes:', shapes);
       scene.setUserShapes(shapes);
     },
 
     setAutoShapes(shapes) {
-      //console.log('Setting system shapes:', shapes);
+      console.log('Setting system shapes:', shapes);
       scene.setSystemShapes(shapes);
     },
 
     dragNewPiece(piece, event, force) {
-      //console.log(`Dragging new piece ${piece} with event:`, event, 'force:', force);
+      console.log(`Dragging new piece ${piece} with event:`, event, 'force:', force);
       dragNewPiece(state, piece, event, force);
     },
 
     redrawAll() {
-      //console.log('Redrawing all elements.');
+      console.log('Redrawing all elements.');
       return () => {};
     },
 
     playPremove() {
-      //console.log('Playing premove.');
+      console.log('Playing premove.');
       return scene.playPremove();
     },
 
     cancelPremove() {
-      //console.log('Cancelling premove.');
+      console.log('Cancelling premove.');
       scene.cancelPremove();
     },
 
     playPredrop(validate: (drop: Drop) => boolean): boolean {
-      //console.log('Playing predrop with validation function:', validate);
+      console.log('Playing predrop with validation function:', validate);
       const drop = state.predroppable.current;
       if (!drop) {
         return false;
@@ -175,7 +175,7 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
     },
 
     cancelPredrop() {
-      //console.log('Cancelling predrop.');
+      console.log('Cancelling predrop.');
       if (state.predroppable.current) {
         state.predroppable.current = undefined;
         state.predroppable.events.unset?.();
@@ -184,7 +184,7 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
     },
 
     getKeyAtDomPos(pos) {
-      //console.log('Getting key at DOM position:', pos);
+      console.log('Getting key at DOM position:', pos);
       return scene.getKeyAtDomPos(pos);
     },
 

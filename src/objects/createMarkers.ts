@@ -102,3 +102,16 @@ export function createLastMoveToHighlightMarker() {
     }),
   );
 }
+
+export function createSelectedSquareMarker() {
+  return new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({
+      color: '#51a04f',
+      transparent: true,
+      opacity: 0.4,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+}

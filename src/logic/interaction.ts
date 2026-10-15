@@ -6,6 +6,7 @@ import {
   createLastMoveFromHighlightMarker,
   createLastMoveToHighlightMarker,
   createPremoveHighlightMarker,
+  createSelectedSquareMarker,
 } from '../objects/createMarkers';
 import { createArrowMesh, createCircleMesh } from '../objects/createShapes.js';
 
@@ -100,6 +101,7 @@ export function setupPieceInteraction({
   const lastMoveToHighlight = createLastMoveToHighlightMarker();
   const premoveFromHighlight = createPremoveHighlightMarker(false);
   const premoveToHighlight = createPremoveHighlightMarker(true);
+  const selectedSquareHighlight = createSelectedSquareMarker();
   const selectableMoveHighlights = new THREE.Group();
   lastMoveFromHighlight.rotation.x = -Math.PI / 2;
   lastMoveToHighlight.rotation.x = -Math.PI / 2;
@@ -109,10 +111,15 @@ export function setupPieceInteraction({
   lastMoveToHighlight.visible = false;
   lastMoveFromHighlight.renderOrder = 8;
   lastMoveToHighlight.renderOrder = 9;
+  selectedSquareHighlight.rotation.x = -Math.PI / 2;
+  selectedSquareHighlight.position.y = 0.007;
+  selectedSquareHighlight.visible = false;
+  selectedSquareHighlight.renderOrder = 10;
   board.add(lastMoveFromHighlight);
   board.add(lastMoveToHighlight);
   board.add(premoveFromHighlight);
   board.add(premoveToHighlight);
+  board.add(selectedSquareHighlight);
   board.add(selectableMoveHighlights);
 
   let state: State | null = null;
@@ -324,6 +331,7 @@ export function setupPieceInteraction({
   function clearSelection() {
     selectedPiece = null;
     clearSelectableMoveHighlights();
+    selectedSquareHighlight.visible = false;
   }
 
   function isQueuedPremoveOrigin(piece: THREE.Mesh): boolean {
@@ -352,6 +360,9 @@ export function setupPieceInteraction({
 
     selectedPiece = piece;
     showSelectableMoveHighlights(piece);
+    selectedSquareHighlight.visible = true;
+    selectedSquareHighlight.position.x = getSquareCoordinate(piece.position.x);
+    selectedSquareHighlight.position.z = getSquareCoordinate(piece.position.z);
   }
 
   function applyMoveOrCapture(

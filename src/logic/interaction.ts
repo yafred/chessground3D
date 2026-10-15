@@ -66,7 +66,7 @@ type MoveResult = {
 };
 
 export type PieceInteractionController = {
-  moveProgrammaticallyBySquare: (from: Key, to: Key, state: State) => boolean;
+  moveProgrammaticallyBySquare: (from: Key, to: Key) => boolean;
   selectSquare: (key: Key | null) => void;
   setLastMoveSquares: (squares?: readonly Key[]) => void;
   setMoveAttemptCallback: (callback: (uci: string) => boolean) => void; // Set callback for validating user moves
@@ -615,7 +615,7 @@ export function setupPieceInteraction({
     return moved;
   }
 
-  function moveProgrammaticallyBySquare(from: Key, to: Key, state: State): boolean {
+  function moveProgrammaticallyBySquare(from: Key, to: Key): boolean {
     const source = keyToCoordinates(from);
     const target = keyToCoordinates(to);
     if (!source || !target) {
@@ -625,7 +625,7 @@ export function setupPieceInteraction({
     const moveResult = moveProgrammaticallyByCoordinates(source.x, source.z, target.x, target.z);
 
     if (moveResult.success) {
-      state.events.move?.(from, to, moveResult.capture);
+      state?.events.move?.(from, to, moveResult.capture);
     }
     return moveResult.success;
   }

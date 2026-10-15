@@ -1,5 +1,17 @@
-import { type Key, type Pieces } from '@lichess-org/chessground/types';
+import { type Key, type Piece, type Pieces } from '@lichess-org/chessground/types';
+import { key2pos } from '@lichess-org/chessground/util';
 import * as THREE from 'three';
+
+import { coordinatesToSquare, keyToCoordinates, pieceCodes } from './util';
+
+const roleCodes: Record<Piece['role'], string> = {
+  pawn: 'P',
+  knight: 'N',
+  bishop: 'B',
+  rook: 'R',
+  queen: 'Q',
+  king: 'K',
+};
 
 type MoveAnimation = {
   wrapper: THREE.Group;
@@ -17,8 +29,11 @@ export type MoveAnimator = {
     toX: number,
     toZ: number,
     destination: Key,
-  ) => void;
+  ) => boolean;
   update: (deltaSeconds: number) => void;
+  // Animates pieces that moved between two piece maps (e.g. after an external state change),
+  // and returns the destination squares whose meshes must not be rebuilt.
+  animatePieceChanges: (previousPieces: Pieces, currentPieces: Pieces) => Set<Key>;
   // Ends animations whose destination no longer holds a piece, and returns the squares still animating
   // so that their meshes are not rebuilt.
   syncWithPieces: (pieces: Pieces) => Set<Key>;
@@ -50,7 +65,7 @@ export function createMoveAnimator(board: THREE.Group, getDurationSeconds: () =>
     destination: Key,
   ) {
     if (getDurationSeconds() <= 0) {
-      return;
+      return false;
     }
 
     const previous = animations.find(animation => animation.piece === piece);
@@ -64,6 +79,7 @@ export function createMoveAnimator(board: THREE.Group, getDurationSeconds: () =>
     animationGroup.add(wrapper);
     wrapper.add(piece);
     animations.push({ wrapper, piece, startOffset, elapsed: 0, destination });
+    return true;
   }
 
   function update(deltaSeconds: number) {
@@ -84,15 +100,76 @@ export function createMoveAnimator(board: THREE.Group, getDurationSeconds: () =>
     }
   }
 
+  function animatePieceChanges(previousPieces: Pieces, currentPieces: Pieces): Set<Key> {
+    const meshesBySquare = new Map<Key, THREE.Mesh>();
+    board.traverse(object => {
+      if (object instanceof THREE.Mesh && pieceCodes.has(object.name)) {
+        meshesBySquare.set(coordinatesToSquare(object.position.x, object.position.z), object);
+      }
+    });
+
+    const origins: { key: Key; piece: Piece; mesh: THREE.Mesh }[] = [];
+    for (const [key, piece] of previousPieces) {
+      const current = currentPieces.get(key);
+      const mesh = meshesBySquare.get(key);
+      if (mesh && (!current || current.color !== piece.color || current.role !== piece.role)) {
+        origins.push({ key, piece, mesh });
+      }
+    }
+    const animatedSquares = new Set<Key>();
+    const usedOrigins = new Set<Key>();
+
+    for (const [destination, piece] of currentPieces) {
+      const previous = previousPieces.get(destination);
+      if (previous?.color === piece.color && previous.role === piece.role) continue;
+
+      const target = keyToCoordinates(destination);
+      if (!target) continue;
+
+      const targetPos = key2pos(destination);
+      const origin = origins
+        .filter(
+          candidate =>
+            !usedOrigins.has(candidate.key) &&
+            candidate.piece.color === piece.color &&
+            candidate.piece.role === piece.role,
+        )
+        .sort((a, b) => {
+          const aPos = key2pos(a.key);
+          const bPos = key2pos(b.key);
+          const aDistance = (aPos[0] - targetPos[0]) ** 2 + (aPos[1] - targetPos[1]) ** 2;
+          const bDistance = (bPos[0] - targetPos[0]) ** 2 + (bPos[1] - targetPos[1]) ** 2;
+          return aDistance - bDistance;
+        })[0];
+      if (!origin) continue;
+
+      const source = board.worldToLocal(origin.mesh.getWorldPosition(new THREE.Vector3()));
+
+      origin.mesh.position.set(target.x, 0, target.z);
+      if (animateMove(origin.mesh, source.x, source.z, target.x, target.z, destination)) {
+        usedOrigins.add(origin.key);
+        animatedSquares.add(destination);
+      }
+    }
+
+    return animatedSquares;
+  }
+
   // Returns the set of squares that are still animating.
   function syncWithPieces(pieces: Pieces): Set<Key> {
     for (let i = animations.length - 1; i >= 0; i--) {
-      if (!pieces.has(animations[i].destination)) {
+      const piece = pieces.get(animations[i].destination);
+      const expectedName = piece
+        ? piece.color === 'white'
+          ? roleCodes[piece.role]
+          : roleCodes[piece.role].toLowerCase()
+        : undefined;
+      if (animations[i].piece.name !== expectedName) {
         finish(animations[i]);
       }
     }
     return new Set(animations.map(animation => animation.destination));
   }
 
-  return { animateMove, update, syncWithPieces };
+  return { animateMove, update, animatePieceChanges, syncWithPieces };
 }

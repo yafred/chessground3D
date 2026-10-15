@@ -2,7 +2,13 @@ import { type DrawShape } from '@lichess-org/chessground/draw';
 import { write as fenWrite } from '@lichess-org/chessground/fen';
 import { premove } from '@lichess-org/chessground/premove';
 import { type State } from '@lichess-org/chessground/state';
-import { type Color, type Key, type MouchEvent, type Piece } from '@lichess-org/chessground/types';
+import {
+  type Color,
+  type Key,
+  type MouchEvent,
+  type Piece,
+  type Pieces,
+} from '@lichess-org/chessground/types';
 import { eventPosition, opposite } from '@lichess-org/chessground/util';
 import * as THREE from 'three';
 
@@ -33,7 +39,7 @@ import { handleResize } from './systems/resize.js';
 const SCENE_ASSET_URL = new URL('/assets/scene.glb', window.location.origin).href; // hardcoded for lila
 
 export interface ChessScene {
-  set(state: State, hasFen?: boolean): void;
+  set(state: State, hasFen?: boolean, previousPieces?: Pieces): void;
   move(from: Key, to: Key): void;
   selectSquare(key: Key | null): void;
   setSystemShapes(shapes: DrawShape[]): void;
@@ -180,11 +186,16 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     }
   }
 
-  function applyState(s: State, hasFen = true) {
+  function applyState(s: State, previousPieces?: Pieces, hasFen = true) {
     updatePredropHighlight(s);
     interactionController.setLastMoveSquares(s.highlight.lastMove ? s.lastMove : undefined);
     if (hasFen) {
-      const preservedPieceSquares = moveAnimator.syncWithPieces(s.pieces);
+      const preservedPieceSquares = previousPieces
+        ? moveAnimator.animatePieceChanges(previousPieces, s.pieces)
+        : new Set<Key>();
+      for (const square of moveAnimator.syncWithPieces(s.pieces)) {
+        preservedPieceSquares.add(square);
+      }
       piecesToScene(s.pieces, board, pieceTemplates, materialTemplates, preservedPieceSquares);
     }
     updateCheckHighlight(checkHighlight, s.check, s.highlight.check);
@@ -249,8 +260,8 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
 
   // API implementation
   return {
-    set(state, hasFen = true) {
-      applyState(state, hasFen);
+    set(state, hasFen, previousPieces) {
+      applyState(state, previousPieces, hasFen ?? true);
     },
 
     move(from, to) {

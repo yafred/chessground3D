@@ -53,8 +53,9 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
 
     set(config) {
       console.log('API - set', config);
+      const previousPieces = 'fen' in config ? new Map(state.pieces) : undefined;
       configure(state, config);
-      scene.set(state, 'fen' in config);
+      scene.set(state, 'fen' in config, previousPieces);
     },
 
     getFen() {

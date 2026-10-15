@@ -1,19 +1,7 @@
 import { type Key } from '@lichess-org/chessground/types';
 import * as THREE from 'three';
 
-import { coordinatesToSquare, pieceCodes } from '../logic/util.js';
-
-function getPieceMeshFromObject(object: THREE.Object3D | null): THREE.Mesh | null {
-  let current: THREE.Object3D | null = object;
-  while (current) {
-    if (current instanceof THREE.Mesh && pieceCodes.has(current.name)) {
-      return current;
-    }
-    current = current.parent;
-  }
-
-  return null;
-}
+import { coordinatesToSquare, getPieceMeshFromObject } from '../logic/util.js';
 
 export function createSquarePicker(
   htmlElement: HTMLElement,

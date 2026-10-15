@@ -4,6 +4,18 @@ import * as THREE from 'three';
 
 export const pieceCodes = new Set(['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p']);
 
+export function getPieceMeshFromObject(object: THREE.Object3D | null): THREE.Mesh | null {
+  let current: THREE.Object3D | null = object;
+  while (current) {
+    if (current instanceof THREE.Mesh && pieceCodes.has(current.name)) {
+      return current;
+    }
+    current = current.parent;
+  }
+
+  return null;
+}
+
 export function coordinatesToSquare(x: number, z: number): Key {
   const fileIndex = Math.round(x + 3.5);
   const rank = Math.round(4.5 - z);

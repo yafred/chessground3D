@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { pieceCodes } from './util';
+import { getPieceMeshFromObject } from './util';
 
 export type PieceHoverController = {
   updateFromPointerEvent: (event: PointerEvent) => void;
@@ -9,18 +9,6 @@ export type PieceHoverController = {
   setDraggedPiece: (piece: THREE.Mesh | null) => void;
   setIgnoredPiece: (piece: THREE.Mesh | null) => void;
 };
-
-function getPieceMeshFromObject(object: THREE.Object3D | null): THREE.Mesh | null {
-  let current: THREE.Object3D | null = object;
-  while (current) {
-    if (current instanceof THREE.Mesh && pieceCodes.has(current.name)) {
-      return current;
-    }
-    current = current.parent;
-  }
-
-  return null;
-}
 
 export function createPieceHoverController(
   scene: THREE.Scene,

@@ -13,7 +13,7 @@ import { createArrowMesh, createCircleMesh } from '../objects/createShapes.js';
 import { type PieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
 import { disposeShape, updateMeshesFromShapes } from './shapes.js';
-import { coordinatesToSquare, getPieceAtSquare, keyToCoordinates, pieceCodes } from './util';
+import { coordinatesToSquare, getPieceAtSquare, getPieceMeshFromObject, keyToCoordinates } from './util';
 
 const pieceRoleByCode: Record<string, Piece['role']> = {
   p: 'pawn',
@@ -152,18 +152,6 @@ export function setupPieceInteraction({
   let onPremoveSet: ((orig: Key, dest: Key) => void) | undefined;
   let onPremoveUnset: (() => void) | undefined;
   let userShapesGroup: THREE.Group | null = null;
-
-  function getPieceMeshFromObject(object: THREE.Object3D | null): THREE.Mesh | null {
-    let current: THREE.Object3D | null = object;
-    while (current) {
-      if (current instanceof THREE.Mesh && pieceCodes.has(current.name)) {
-        return current;
-      }
-      current = current.parent;
-    }
-
-    return null;
-  }
 
   function pointerNdcFromEvent(event: PointerEvent, out: THREE.Vector2 = new THREE.Vector2()): THREE.Vector2 {
     const rect = renderer.domElement.getBoundingClientRect();

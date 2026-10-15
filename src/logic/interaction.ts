@@ -76,8 +76,6 @@ export type PieceInteractionController = {
   setDraggable: (enabled: boolean) => void;
   setSelectable: (enabled: boolean) => void;
   setInteractionEnabled: (enabled: boolean) => void;
-  setTurnColor: (color?: Color) => void; // color allowed to move immediately (others queue premoves)
-  setMovableColor: (color?: Color | 'both') => void; // 'both' is never a premove candidate
   setPremoveDests: (dests?: Map<Key, readonly Key[]>, showDests?: boolean) => void;
   setPremoveCallbacks: (callbacks: { onSet?: (orig: Key, dest: Key) => void; onUnset?: () => void }) => void;
   getQueuedPremove: () => { orig: Key; dest: Key } | undefined;
@@ -462,26 +460,14 @@ export function setupPieceInteraction({
     }
   }
 
-  function setTurnColor(color?: Color) {
-    turnColor = color;
-    if (selectedPiece) {
-      showSelectableMoveHighlights(selectedPiece);
-    }
-  }
-
   function setState(newState: State | null) {
     state = newState;
+    turnColor = state?.turnColor;
+    movableColor = state?.movable?.color;
   }
 
   function setUserShapesGroup(group: THREE.Group) {
     userShapesGroup = group;
-  }
-
-  function setMovableColor(color?: Color | 'both') {
-    movableColor = color;
-    if (selectedPiece) {
-      showSelectableMoveHighlights(selectedPiece);
-    }
   }
 
   function setPremoveDests(dests?: Map<Key, readonly Key[]>, nextShowDests = true) {
@@ -1124,8 +1110,6 @@ export function setupPieceInteraction({
     setDraggable,
     setSelectable,
     setInteractionEnabled,
-    setTurnColor,
-    setMovableColor,
     setPremoveDests,
     setPremoveCallbacks,
     getQueuedPremove,

@@ -55,6 +55,14 @@ type ClickState = {
 type SetupPieceInteractionParams = {
   scene: THREE.Scene;
   board: THREE.Group;
+  animateMove: (
+    piece: THREE.Mesh,
+    fromX: number,
+    fromZ: number,
+    toX: number,
+    toZ: number,
+    destination: Key,
+  ) => void;
   camera: THREE.Camera;
   renderer: THREE.WebGLRenderer;
   hoverController: PieceHoverController;
@@ -88,6 +96,7 @@ export type PieceInteractionController = {
 export function setupPieceInteraction({
   scene,
   board,
+  animateMove,
   camera,
   renderer,
   hoverController,
@@ -608,6 +617,7 @@ export function setupPieceInteraction({
     const moved = applyMoveOrCapture(movingPiece, targetX, targetZ, sourceX, sourceZ, false, false);
     if (moved.success) {
       clearSelection();
+      animateMove(movingPiece, sourceX, sourceZ, targetX, targetZ, coordinatesToSquare(targetX, targetZ));
     }
 
     return moved;
@@ -651,8 +661,19 @@ export function setupPieceInteraction({
         return;
       }
 
-      attemptInteractionMove(selectedPiece, coords.x, coords.z);
+      const movingPiece = selectedPiece;
+      const fromX = movingPiece.position.x;
+      const fromZ = movingPiece.position.z;
+      const played = attemptInteractionMove(movingPiece, coords.x, coords.z);
       clearSelection();
+      // a queued premove leaves the piece where it was
+      if (played && (movingPiece.position.x !== fromX || movingPiece.position.z !== fromZ)) {
+        // the move callback may have rebuilt the pieces, so animate the mesh now at the destination
+        const pieceAtDestination = getPieceAtSquare(scene, coords.x, coords.z);
+        if (pieceAtDestination) {
+          animateMove(pieceAtDestination, fromX, fromZ, coords.x, coords.z, key);
+        }
+      }
       return;
     }
 

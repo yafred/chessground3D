@@ -10,6 +10,7 @@ import { updateCheckHighlight } from './logic/checkHighlight.js';
 import { createPieceHoverController } from './logic/hover.js';
 import { setupPieceInteraction } from './logic/interaction.js';
 import { applyInteractionPolicy } from './logic/interactionPolicy.js';
+import { createMoveAnimator } from './logic/moveAnimation.js';
 import { setupMoveAttemptAdapter } from './logic/moveAttemptAdapter.js';
 import { updateMeshesFromShapes } from './logic/shapes.js';
 import { coordinatesToSquare, keyToCoordinates, pieceCodes } from './logic/util.js';
@@ -79,6 +80,11 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
   let targetRotationY = 0;
   let lastFrameTime = performance.now();
 
+  // chessground expresses animation.duration in milliseconds
+  const moveAnimator = createMoveAnimator(board, () =>
+    state.animation.enabled ? state.animation.duration / 1000 : 0,
+  );
+
   function setOrientation(orientation: Color) {
     if (!orientation || orientation === currentOrientation) {
       return;
@@ -99,6 +105,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     camera,
     renderer,
     hoverController,
+    animateMove: moveAnimator.animateMove,
   });
   interactionController.setUserShapesGroup(userShapesGroup);
 
@@ -177,7 +184,8 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     updatePredropHighlight(s);
     interactionController.setLastMoveSquares(s.highlight.lastMove ? s.lastMove : undefined);
     if (hasFen) {
-      piecesToScene(s.pieces, board, pieceTemplates, materialTemplates);
+      const preservedPieceSquares = moveAnimator.syncWithPieces(s.pieces);
+      piecesToScene(s.pieces, board, pieceTemplates, materialTemplates, preservedPieceSquares);
     }
     updateCheckHighlight(checkHighlight, s.check, s.highlight.check);
 
@@ -205,6 +213,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     const now = performance.now();
     const delta = (now - lastFrameTime) / 1000;
     lastFrameTime = now;
+    moveAnimator.update(delta);
     board.rotation.y = THREE.MathUtils.damp(board.rotation.y, targetRotationY, 8, delta);
     if (Math.abs(board.rotation.y - targetRotationY) < 0.0001) {
       targetRotationY = currentOrientation === 'white' ? 0 : Math.PI;

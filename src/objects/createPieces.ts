@@ -1,4 +1,4 @@
-import { type Pieces } from '@lichess-org/chessground/types';
+import { type Key, type Pieces } from '@lichess-org/chessground/types';
 import { key2pos } from '@lichess-org/chessground/util';
 import * as THREE from 'three';
 
@@ -25,6 +25,7 @@ export function piecesToScene(
   board: THREE.Group,
   pieceTemplates: Map<string, THREE.Mesh>,
   materialTemplates: Map<string, THREE.Material>,
+  preservedPieceSquares: ReadonlySet<Key> = new Set(),
 ) {
   // Remove clones previously created.
   for (let i = board.children.length - 1; i >= 0; i--) {
@@ -42,6 +43,10 @@ export function piecesToScene(
   }
 
   for (const [key, piece] of pieces) {
+    if (preservedPieceSquares.has(key)) {
+      continue;
+    }
+
     const pieceName = pieceRoleMap[piece.role];
     const pieceMesh = pieceName ? pieceTemplates.get(pieceName) : undefined;
     if (!pieceMesh) {

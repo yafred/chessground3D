@@ -977,11 +977,6 @@ export function setupPieceInteraction({
     }
   });
 
-  renderer.domElement.addEventListener('dblclick', event => {
-    shapeDrawing.toggleEnabled();
-    event.preventDefault();
-  });
-
   return {
     moveProgrammaticallyBySquare,
     selectSquare,

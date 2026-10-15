@@ -21,7 +21,6 @@ export type ShapeDrawingController = {
   move(event: PointerEvent): void;
   finish(event: PointerEvent): void;
   clear(): void;
-  toggleEnabled(): void;
 };
 
 export function createShapeDrawingController(
@@ -36,7 +35,6 @@ export function createShapeDrawingController(
   const boardPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const boardPoint = new THREE.Vector3();
   let drawState: DrawState | null = null;
-  let drawEnabled = true;
 
   function getBoardPoint(event: PointerEvent): THREE.Vector3 | null {
     const rect = domElement.getBoundingClientRect();
@@ -90,7 +88,7 @@ export function createShapeDrawingController(
   }
 
   function start(event: PointerEvent) {
-    if (event.button !== 2 || !drawEnabled) {
+    if (event.button !== 2) {
       return;
     }
 
@@ -174,8 +172,5 @@ export function createShapeDrawingController(
     move: handleDraw,
     finish,
     clear,
-    toggleEnabled() {
-      drawEnabled = !drawEnabled;
-    },
   };
 }

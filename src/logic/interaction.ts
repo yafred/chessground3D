@@ -68,7 +68,6 @@ export type PieceInteractionController = {
   moveProgrammaticallyBySquare: (from: Key, to: Key, state: State) => boolean;
   selectSquare: (key: Key | null) => void;
   setLastMoveSquares: (squares?: readonly Key[]) => void;
-  setAllowedMoveDests: (dests?: Map<Key, readonly Key[]>, showDests?: boolean) => void;
   setMoveAttemptCallback: (callback: (uci: string) => boolean) => void; // Set callback for validating user moves
   setMoveCallback: (callback: (from: Key, to: Key, isPremove: boolean) => void) => void; // Set callback after a successful move
   setAllowWhiteInteraction: (allow: boolean) => void;
@@ -130,7 +129,6 @@ export function setupPieceInteraction({
   let selectable = true;
   let interactionEnabled = true;
   let allowedMoveDests: Map<Key, readonly Key[]> | undefined;
-  let showDests = true;
   let turnColor: Color | undefined;
   let movableColor: Color | 'both' | undefined;
   let premoveDests: Map<Key, readonly Key[]> | undefined;
@@ -208,7 +206,7 @@ export function setupPieceInteraction({
   function showSelectableMoveHighlights(piece: THREE.Mesh, fromSquareOverride?: Key) {
     const isPremove = isPremoveCandidate(piece);
     const dests = isPremove ? premoveDests : allowedMoveDests;
-    const show = isPremove ? showPremoveDests : showDests;
+    const show = isPremove ? showPremoveDests : state?.movable?.showDests;
     updateMoveDestinationHighlights(
       scene,
       selectableMoveHighlights,
@@ -450,20 +448,11 @@ export function setupPieceInteraction({
     onMove = callback;
   }
 
-  function setAllowedMoveDests(dests?: Map<Key, readonly Key[]>, nextShowDests = true) {
-    allowedMoveDests = dests;
-    showDests = nextShowDests;
-    if (selectedPiece) {
-      showSelectableMoveHighlights(selectedPiece);
-    } else {
-      clearSelectableMoveHighlights();
-    }
-  }
-
   function setState(newState: State | null) {
     state = newState;
     turnColor = state?.turnColor;
     movableColor = state?.movable?.color;
+    allowedMoveDests = state?.movable?.dests;
   }
 
   function setUserShapesGroup(group: THREE.Group) {
@@ -1102,7 +1091,6 @@ export function setupPieceInteraction({
     moveProgrammaticallyBySquare,
     selectSquare,
     setLastMoveSquares,
-    setAllowedMoveDests,
     setMoveAttemptCallback,
     setMoveCallback,
     setAllowWhiteInteraction,

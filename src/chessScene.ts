@@ -83,7 +83,6 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
   let pieceTemplates = new Map<string, THREE.Mesh>();
   let isDestroyed = false;
   let currentOrientation: Color = 'white';
-  let targetRotationY = 0;
   let lastFrameTime = performance.now();
 
   // chessground expresses animation.duration in milliseconds
@@ -95,8 +94,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     if (!orientation || orientation === currentOrientation) {
       return;
     }
-    targetRotationY = orientation === 'white' ? 0 : Math.PI;
-
+    board.rotation.y = orientation === 'white' ? 0 : Math.PI;
     currentOrientation = orientation;
   }
 
@@ -225,11 +223,6 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     const delta = (now - lastFrameTime) / 1000;
     lastFrameTime = now;
     moveAnimator.update(delta);
-    board.rotation.y = THREE.MathUtils.damp(board.rotation.y, targetRotationY, 8, delta);
-    if (Math.abs(board.rotation.y - targetRotationY) < 0.0001) {
-      targetRotationY = currentOrientation === 'white' ? 0 : Math.PI;
-      board.rotation.y = targetRotationY;
-    }
 
     // Custom SVGs stay facing the camera (same as white orientation) while the board rotates.
     for (const group of [systemShapesGroup, userShapesGroup]) {

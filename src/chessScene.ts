@@ -183,7 +183,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     }
     updateCheckHighlight(checkHighlight, s.check, s.highlight.check);
 
-    interactionController.setPremoveDests(computePremoveDests(s), s.premovable.showDests);
+    interactionController.setPremoveDests(computePremoveDests(s));
 
     setOrientation(s.orientation);
     setAllowInteractionForColors(s);

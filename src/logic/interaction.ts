@@ -75,7 +75,7 @@ export type PieceInteractionController = {
   setDraggable: (enabled: boolean) => void;
   setSelectable: (enabled: boolean) => void;
   setInteractionEnabled: (enabled: boolean) => void;
-  setPremoveDests: (dests?: Map<Key, readonly Key[]>, showDests?: boolean) => void;
+  setPremoveDests: (dests?: Map<Key, readonly Key[]>) => void;
   setPremoveCallbacks: (callbacks: { onSet?: (orig: Key, dest: Key) => void; onUnset?: () => void }) => void;
   getQueuedPremove: () => { orig: Key; dest: Key } | undefined;
   playQueuedPremove: () => boolean; // attempt to play the queued premove now; always clears it
@@ -132,7 +132,6 @@ export function setupPieceInteraction({
   let turnColor: Color | undefined;
   let movableColor: Color | 'both' | undefined;
   let premoveDests: Map<Key, readonly Key[]> | undefined;
-  let showPremoveDests = true;
   let queuedPremove: { orig: Key; dest: Key } | undefined;
   let onPremoveSet: ((orig: Key, dest: Key) => void) | undefined;
   let onPremoveUnset: (() => void) | undefined;
@@ -206,7 +205,7 @@ export function setupPieceInteraction({
   function showSelectableMoveHighlights(piece: THREE.Mesh, fromSquareOverride?: Key) {
     const isPremove = isPremoveCandidate(piece);
     const dests = isPremove ? premoveDests : allowedMoveDests;
-    const show = isPremove ? showPremoveDests : state?.movable?.showDests;
+    const show = isPremove ? state?.premovable?.showDests : state?.movable?.showDests;
     updateMoveDestinationHighlights(
       scene,
       selectableMoveHighlights,
@@ -459,12 +458,8 @@ export function setupPieceInteraction({
     userShapesGroup = group;
   }
 
-  function setPremoveDests(dests?: Map<Key, readonly Key[]>, nextShowDests = true) {
+  function setPremoveDests(dests?: Map<Key, readonly Key[]>) {
     premoveDests = dests;
-    showPremoveDests = nextShowDests;
-    if (selectedPiece && isPremoveCandidate(selectedPiece)) {
-      showSelectableMoveHighlights(selectedPiece);
-    }
   }
 
   function setPremoveCallbacks(callbacks: { onSet?: (orig: Key, dest: Key) => void; onUnset?: () => void }) {

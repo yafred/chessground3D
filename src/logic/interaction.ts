@@ -631,6 +631,8 @@ export function setupPieceInteraction({
       return;
     }
 
+    state?.events?.select?.(key);
+
     const targetPiece = getPieceAtSquare(scene, coords.x, coords.z);
 
     if (selectedPiece) {
@@ -734,12 +736,17 @@ export function setupPieceInteraction({
     const { piece, startPosition } = dragState;
 
     if (!dragState.hasMoved) {
+      const clickedSquare = event.type === 'pointerup' ? getSquareKeyUnderPointer(event) : null;
       piece.position.copy(startPosition);
       piece.position.y = startPosition.y;
       dragState = null;
       hoverController.setDraggedPiece(null);
       hoverController.setIgnoredPiece(null);
       hoverController.setEnabled(true);
+
+      if (clickedSquare) {
+        state?.events?.select?.(clickedSquare);
+      }
 
       if (selectedPiece === piece) {
         clearSelection();
@@ -944,6 +951,11 @@ export function setupPieceInteraction({
         }
       } else {
         handleSelectedPieceClickTarget(event);
+      }
+    } else {
+      const key = getSquareKeyUnderPointer(event);
+      if (key) {
+        state?.events?.select?.(key);
       }
     }
   });

@@ -798,9 +798,8 @@ export function setupPieceInteraction({
         return;
       }
 
-      if (drawEnabled) {
-        event.stopPropagation();
-      }
+      event.preventDefault();
+      event.stopPropagation();
 
       pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
       const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
@@ -840,16 +839,11 @@ export function setupPieceInteraction({
 
       const pieceHit = getPieceHitUnderPointer(event);
       if (!pieceHit) {
-        if (selectedPiece) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
         return;
       }
       const { piece } = pieceHit;
 
       if (selectedPiece && piece !== selectedPiece) {
-        event.stopPropagation();
         clickState = {
           pointerId: event.pointerId,
           startClientX: event.clientX,
@@ -863,7 +857,6 @@ export function setupPieceInteraction({
       }
 
       if (!draggable) {
-        event.stopPropagation();
         clickState = {
           pointerId: event.pointerId,
           startClientX: event.clientX,
@@ -872,7 +865,6 @@ export function setupPieceInteraction({
         return;
       }
 
-      event.stopPropagation();
       const grabPoint = pieceHit.point.clone();
       board.worldToLocal(grabPoint);
       const pointerOffsetX = piece.position.x - grabPoint.x;

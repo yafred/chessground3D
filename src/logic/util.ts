@@ -22,6 +22,14 @@ export function coordinatesToSquare(x: number, z: number): Key {
   return (String.fromCharCode('a'.charCodeAt(0) + fileIndex) + rank) as Key;
 }
 
+export function getSquareCoordinate(value: number): number {
+  return Math.round(value + 3.5) - 3.5;
+}
+
+export function isWithinBoard(x: number, z: number): boolean {
+  return Math.abs(x) <= 4 && Math.abs(z) <= 4;
+}
+
 export function keyToCoordinates(key: Key): { x: number; z: number } | null {
   const pos = key2pos(key);
   if (!pos) {

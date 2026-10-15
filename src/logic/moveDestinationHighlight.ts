@@ -3,11 +3,7 @@ import type * as THREE from 'three';
 
 import { createMoveDestinationHighlightMarker } from '../objects/createMarkers';
 
-import { coordinatesToSquare, getPieceAtSquare, keyToCoordinates } from './util';
-
-function getSquareCoordinate(value: number): number {
-  return Math.round(value + 3.5) - 3.5;
-}
+import { coordinatesToSquare, getPieceAtSquare, getSquareCoordinate, keyToCoordinates } from './util';
 
 export function clearMoveDestinationHighlights(highlightGroup: THREE.Group) {
   highlightGroup.clear();

@@ -8,12 +8,18 @@ import {
   createPremoveHighlightMarker,
   createSelectedSquareMarker,
 } from '../objects/createMarkers';
-import { createArrowMesh, createCircleMesh } from '../objects/createShapes.js';
 
 import { type PieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
-import { disposeShape, updateMeshesFromShapes } from './shapes.js';
-import { coordinatesToSquare, getPieceAtSquare, getPieceMeshFromObject, keyToCoordinates } from './util';
+import { createShapeDrawingController } from './shapeDrawing.js';
+import {
+  coordinatesToSquare,
+  getPieceAtSquare,
+  getPieceMeshFromObject,
+  getSquareCoordinate,
+  isWithinBoard,
+  keyToCoordinates,
+} from './util';
 
 const pieceRoleByCode: Record<string, Piece['role']> = {
   p: 'pawn',
@@ -22,16 +28,6 @@ const pieceRoleByCode: Record<string, Piece['role']> = {
   r: 'rook',
   q: 'queen',
   k: 'king',
-};
-
-type DrawState = {
-  pointerId: number;
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-  shapeMesh: THREE.Mesh;
-  brush: string;
 };
 
 type DragState = {
@@ -132,8 +128,6 @@ export function setupPieceInteraction({
   board.add(selectableMoveHighlights);
 
   let state: State | null = null;
-  let drawState: DrawState | null = null; // maybe use state?.drawable.current instead
-  let drawEnabled = true;
   let dragState: DragState | null = null;
   let clickState: ClickState | null = null;
   let selectedPiece: THREE.Mesh | null = null;
@@ -152,20 +146,19 @@ export function setupPieceInteraction({
   let onPremoveSet: ((orig: Key, dest: Key) => void) | undefined;
   let onPremoveUnset: (() => void) | undefined;
   let userShapesGroup: THREE.Group | null = null;
+  const shapeDrawing = createShapeDrawingController(
+    board,
+    camera,
+    renderer.domElement,
+    () => state,
+    () => userShapesGroup,
+  );
 
   function pointerNdcFromEvent(event: PointerEvent, out: THREE.Vector2 = new THREE.Vector2()): THREE.Vector2 {
     const rect = renderer.domElement.getBoundingClientRect();
     out.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     out.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     return out;
-  }
-
-  function getSquareCoordinate(value: number): number {
-    return Math.round(value + 3.5) - 3.5;
-  }
-
-  function isWithinBoard(x: number, z: number): boolean {
-    return Math.abs(x) <= 4 && Math.abs(z) <= 4;
   }
 
   function isWhitePiece(piece: THREE.Mesh): boolean {
@@ -813,35 +806,13 @@ export function setupPieceInteraction({
         board.worldToLocal(boardPoint);
       }
 
-      if (event.button === 2 && drawEnabled) {
-        if (hasBoardIntersection && isWithinBoard(boardPoint.x, boardPoint.z)) {
-          const fromX = getSquareCoordinate(boardPoint.x);
-          const fromY = getSquareCoordinate(boardPoint.z);
-          const brush = event.shiftKey ? 'red' : event.altKey ? 'blue' : event.ctrlKey ? 'red' : 'green';
-          drawState = {
-            pointerId: event.pointerId,
-            fromX,
-            fromY,
-            toX: fromX,
-            toY: fromY,
-            shapeMesh: createCircleMesh(fromX, fromY, brush, 1),
-            brush,
-          };
-          board.add(drawState.shapeMesh);
-        }
-      }
+      shapeDrawing.start(event);
 
       if (event.button !== 0) {
         return;
       }
 
-      if (state?.drawable) {
-        state.drawable.shapes = [];
-        if (userShapesGroup) {
-          updateMeshesFromShapes(userShapesGroup, state.drawable.shapes, state.drawable.brushes);
-        }
-      }
-      state?.drawable?.onChange?.(state.drawable.shapes);
+      shapeDrawing.clear();
 
       const pieceHit = getPieceHitUnderPointer(event);
       if (!pieceHit) {
@@ -904,42 +875,6 @@ export function setupPieceInteraction({
         : '';
   }
 
-  function handleDraw(event: PointerEvent) {
-    if (drawState && event.pointerId === drawState.pointerId) {
-      pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
-      const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
-      if (hasBoardIntersection) {
-        board.worldToLocal(boardPoint);
-      }
-      if (hasBoardIntersection && isWithinBoard(boardPoint.x, boardPoint.z)) {
-        const toX = getSquareCoordinate(boardPoint.x);
-        const toY = getSquareCoordinate(boardPoint.z);
-        if (toX !== drawState.toX || toY !== drawState.toY) {
-          const brush = event.shiftKey ? 'red' : event.altKey ? 'blue' : event.ctrlKey ? 'red' : 'green';
-          drawState.toX = toX;
-          drawState.toY = toY;
-          drawState.brush = brush;
-          drawState.shapeMesh.removeFromParent();
-          disposeShape(drawState.shapeMesh);
-          if (drawState.toX === drawState.fromX && drawState.toY === drawState.fromY) {
-            drawState.shapeMesh = createCircleMesh(drawState.fromX, drawState.fromY, brush, 1);
-          } else {
-            drawState.shapeMesh = createArrowMesh(
-              drawState.fromX,
-              drawState.fromY,
-              drawState.toX,
-              drawState.toY,
-              brush,
-              1,
-            );
-          }
-          board.add(drawState.shapeMesh);
-          event.stopPropagation();
-        }
-      }
-    }
-  }
-
   renderer.domElement.addEventListener('pointermove', event => {
     if (!interactionEnabled) {
       return;
@@ -947,9 +882,7 @@ export function setupPieceInteraction({
 
     updateCursor(event);
 
-    if (drawState && event.pointerId === drawState.pointerId) {
-      handleDraw(event);
-    }
+    shapeDrawing.move(event);
 
     if (!dragState || event.pointerId !== dragState.pointerId) {
       return;
@@ -983,48 +916,7 @@ export function setupPieceInteraction({
       return;
     }
 
-    if (event.button === 2 && drawState && event.pointerId === drawState.pointerId) {
-      handleDraw(event);
-      const orig = coordinatesToSquare(drawState.fromX, drawState.fromY);
-      const dest = coordinatesToSquare(drawState.toX, drawState.toY);
-      const brush = drawState.brush;
-
-      const shapes = state?.drawable?.shapes || [];
-
-      let shapeFound = false;
-      for (let i = shapes.length - 1; i >= 0; i--) {
-        const shape = shapes[i];
-
-        if (shape.orig === orig && (shape.dest === dest || (orig === dest && !shape.dest))) {
-          if (shape.brush === brush) {
-            shapes.splice(i, 1);
-          } else {
-            shape.brush = brush;
-          }
-          shapeFound = true;
-          break;
-        }
-      }
-
-      if (!shapeFound) {
-        shapes.push({
-          orig,
-          dest,
-          brush,
-        });
-      }
-      if (state?.drawable) {
-        state.drawable.shapes = shapes;
-        if (userShapesGroup) {
-          updateMeshesFromShapes(userShapesGroup, shapes, state.drawable.brushes);
-        }
-      }
-
-      drawState.shapeMesh.removeFromParent();
-      disposeShape(drawState.shapeMesh);
-      drawState = null;
-      state?.drawable?.onChange?.(shapes);
-    }
+    shapeDrawing.finish(event);
 
     if (event.button !== 0) {
       return;
@@ -1086,7 +978,7 @@ export function setupPieceInteraction({
   });
 
   renderer.domElement.addEventListener('dblclick', event => {
-    drawEnabled = !drawEnabled;
+    shapeDrawing.toggleEnabled();
     event.preventDefault();
   });
 

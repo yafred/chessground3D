@@ -28,9 +28,7 @@ function loadView(camera: THREE.Camera, controls: OrbitControls) {
       cam.updateProjectionMatrix();
     }
     controls.update();
-  } catch {
-    // ignore unavailable or corrupt storage
-  }
+  } catch {}
 }
 
 function saveView(camera: THREE.Camera, controls: OrbitControls) {
@@ -41,9 +39,7 @@ function saveView(camera: THREE.Camera, controls: OrbitControls) {
       zoom: (camera as THREE.PerspectiveCamera).zoom,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(view));
-  } catch {
-    // ignore unavailable storage
-  }
+  } catch {}
 }
 
 export function createControls(camera: THREE.Camera, domElement: HTMLElement) {

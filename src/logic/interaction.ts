@@ -192,8 +192,8 @@ export function setupPieceInteraction({
     return isWhitePiece(piece) ? allowWhiteInteraction : allowBlackInteraction;
   }
 
+  // Convert board coordinates to square notation (a1-h8)
   function coordinatesToUci(fromX: number, fromZ: number, toX: number, toZ: number): string {
-    // Convert board coordinates to square notation (a1-h8)
     return coordinatesToSquare(fromX, fromZ) + coordinatesToSquare(toX, toZ);
   }
 
@@ -351,7 +351,6 @@ export function setupPieceInteraction({
       return;
     }
 
-    // clicking the piece that owns the queued premove cancels it instead of reselecting
     if (isQueuedPremoveOrigin(piece)) {
       cancelQueuedPremove();
       clearSelection();
@@ -375,13 +374,12 @@ export function setupPieceInteraction({
     triggerMoveCallback = true,
     isPremove = false,
   ): MoveResult {
-    // Validate move through callback if provided
     if (validateWithCallback && onMoveAttempt) {
       const normalizedFromX = getSquareCoordinate(fromX);
       const normalizedFromZ = getSquareCoordinate(fromZ);
       const uci = coordinatesToUci(normalizedFromX, normalizedFromZ, targetX, targetZ);
       if (!onMoveAttempt(uci)) {
-        return { success: false }; // Move rejected by validation callback
+        return { success: false };
       }
     }
 
@@ -421,7 +419,7 @@ export function setupPieceInteraction({
     return { success: true, capture: pieceFromMesh(occupyingPiece) };
   }
 
-  // Routes a user-initiated move: plays it immediately if it's the piece's turn,
+  // User-initiated move: plays it immediately if it's the piece's turn,
   // otherwise queues it as a premove when the destination is a valid premove square.
   function attemptInteractionMove(
     piece: THREE.Mesh,
@@ -793,7 +791,6 @@ export function setupPieceInteraction({
   renderer.domElement.addEventListener(
     'pointerdown',
     event => {
-      // we just handle left-click interactions
       if (!interactionEnabled) {
         return;
       }
@@ -889,7 +886,6 @@ export function setupPieceInteraction({
     { capture: true },
   );
 
-  // hand cursor while hovering a movable piece, and for the whole drag even when the pointer leaves it
   function updateCursor(event: PointerEvent) {
     const piece = !dragState && interactionEnabled ? getPieceUnderPointer(event) : null;
     renderer.domElement.style.cursor = dragState

@@ -10,7 +10,6 @@ export type PieceTemplates = {
 };
 
 export function createPieceTemplates(scene: THREE.Scene, sceneAssetUrl: string): Promise<PieceTemplates> {
-  // Keep the loader here until we need it elsewhere.
   const loader = new GLTFLoader();
 
   return new Promise((resolve, reject) => {

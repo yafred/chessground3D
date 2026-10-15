@@ -90,11 +90,9 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
 
   setOrientation(state.orientation);
 
-  // Set up piece hover and interaction
   const hoverController = createPieceHoverController(scene, camera, renderer.domElement, board);
   htmlElement.addEventListener('pointermove', hoverController.updateFromPointerEvent);
 
-  // Set up interactions
   const interactionController = setupPieceInteraction({
     scene,
     board,
@@ -139,7 +137,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     },
   });
 
-  // premove destinations for every piece of the non-moving color, mirroring board.ts's `premove()` usage
+  // mimic board.ts's `premove()` usage
   function computePremoveDests(s: State): Map<Key, readonly Key[]> | undefined {
     if (!s.premovable.enabled) {
       return undefined;

@@ -80,7 +80,6 @@ export function createPieceHoverController(
       return;
     }
 
-    // Avoid highlighting a square at startup before any pointer input exists.
     if (!hasPointerPosition) {
       squareHighlight.visible = false;
       return;

@@ -91,6 +91,48 @@ export function createCircleMesh(x: number, z: number, color: string, opacity: n
 }
 
 const CUSTOM_SVG_HEIGHT = 0.021;
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+
+function centerAppleGraphic(svgMarkup: string): string {
+  const parsed = new DOMParser().parseFromString(svgMarkup, 'image/svg+xml');
+  const svg = parsed.documentElement;
+  if (svg.localName !== 'svg' || !svg.querySelector('g.apple')) {
+    return svgMarkup;
+  }
+
+  const measuringSvg = svg.cloneNode(true) as SVGSVGElement;
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '-10000px';
+  container.style.top = '-10000px';
+  container.style.visibility = 'hidden';
+  document.body.appendChild(container);
+  container.appendChild(measuringSvg);
+
+  try {
+    const appleGroup = measuringSvg.querySelector('g.apple');
+    const parent = appleGroup?.parentElement;
+    if (!appleGroup || !parent) {
+      return svgMarkup;
+    }
+
+    const centeringGroup = document.createElementNS(SVG_NAMESPACE, 'g');
+    parent.insertBefore(centeringGroup, appleGroup);
+    centeringGroup.appendChild(appleGroup);
+    const bounds = centeringGroup.getBBox();
+    const viewBox = measuringSvg.viewBox.baseVal;
+    const centerX = viewBox.width ? viewBox.x + viewBox.width / 2 : 50;
+    const centerY = viewBox.height ? viewBox.y + viewBox.height / 2 : 50;
+    centeringGroup.setAttribute(
+      'transform',
+      `translate(${centerX - bounds.x - bounds.width / 2} ${centerY - bounds.y - bounds.height / 2})`,
+    );
+
+    return new XMLSerializer().serializeToString(measuringSvg);
+  } finally {
+    container.remove();
+  }
+}
 
 export function createCustomSvgMesh(x: number, z: number, svgHtml: string, size = 2.0): THREE.Mesh {
   const canvas = document.createElement('canvas');
@@ -116,13 +158,19 @@ export function createCustomSvgMesh(x: number, z: number, svgHtml: string, size 
   mesh.renderOrder = 13;
   mesh.userData.keepUpright = true;
 
-  // Render a 200x200 viewBox centered on the square [0..100] (spanning [-50..150]),
-  // mapped onto a 2.0x2.0 plane so badges and drop shadows can overlap adjacent squares without clipping.
-  // Translating by (0, 84) shifts elements originally anchored near the top corner (~(91, 8))
-  // down to the bottom corner (~(91, 92)).
-  const fullSvg = svgHtml.trim().startsWith('<svg')
-    ? svgHtml
-    : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 200 200" width="512" height="512" style="overflow: visible"><g transform="translate(0, 84)">${svgHtml}</g></svg>`;
+  const isAppleGraphic = svgHtml.includes('<g class="apple');
+  const trimmedSvg = svgHtml.trim();
+  let fullSvg: string;
+  if (trimmedSvg.startsWith('<svg')) {
+    fullSvg = trimmedSvg;
+  } else {
+    // The 200x200 viewBox lets badges and drop shadows overlap adjacent squares without clipping.
+    const transform = isAppleGraphic ? '' : ' transform="translate(0, 84)"';
+    fullSvg = `<svg xmlns="${SVG_NAMESPACE}" viewBox="-50 -50 200 200" width="512" height="512" style="overflow: visible"><g${transform}>${svgHtml}</g></svg>`;
+  }
+  if (isAppleGraphic) {
+    fullSvg = centerAppleGraphic(fullSvg);
+  }
 
   const blob = new Blob([fullSvg], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);

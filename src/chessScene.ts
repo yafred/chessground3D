@@ -83,6 +83,41 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
   let isDestroyed = false;
   let currentOrientation: Color = 'white';
   let lastFrameTime = performance.now();
+  let systemShapes: readonly DrawShape[] = [];
+  let userShapes: readonly DrawShape[] = [];
+  let appleSquares: { x: number; z: number }[] = [];
+
+  function updateAppleShapeSquares() {
+    appleSquares = [];
+    for (const shape of [...systemShapes, ...userShapes]) {
+      const customSvg = shape.customSvg as string | { html?: string } | undefined;
+      const html = typeof customSvg === 'string' ? customSvg : customSvg?.html;
+      if (!html?.includes('<g class="apple')) {
+        continue;
+      }
+      const coords = keyToCoordinates(shape.orig);
+      if (coords) {
+        appleSquares.push(coords);
+      }
+    }
+  }
+
+  function updateApplePawnVisibility() {
+    for (const child of board.children) {
+      if (
+        !(child instanceof THREE.Mesh) ||
+        !child.userData.isClone ||
+        (child.name !== 'P' && child.name !== 'p')
+      ) {
+        continue;
+      }
+
+      child.visible = !appleSquares.some(
+        coords =>
+          Math.abs(child.position.x - coords.x) < 0.001 && Math.abs(child.position.z - coords.z) < 0.001,
+      );
+    }
+  }
 
   // chessground expresses animation.duration in milliseconds
   const moveAnimator = createMoveAnimator(board, () =>
@@ -194,6 +229,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
         preservedPieceSquares.add(square);
       }
       piecesToScene(s.pieces, board, pieceTemplates, materialTemplates, preservedPieceSquares);
+      updateApplePawnVisibility();
     }
     updateCheckHighlight(checkHighlight, s.check, s.highlight.check);
 
@@ -222,6 +258,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     const delta = (now - lastFrameTime) / 1000;
     lastFrameTime = now;
     moveAnimator.update(delta);
+    updateApplePawnVisibility();
 
     // Custom SVGs stay facing the camera (same as white orientation) while the board rotates.
     for (const group of [systemShapesGroup, userShapesGroup]) {
@@ -253,11 +290,17 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     },
 
     setSystemShapes(shapes) {
+      systemShapes = shapes;
       updateMeshesFromShapes(systemShapesGroup, shapes, state.drawable.brushes);
+      updateAppleShapeSquares();
+      updateApplePawnVisibility();
     },
 
     setUserShapes(shapes) {
+      userShapes = shapes;
       updateMeshesFromShapes(userShapesGroup, shapes, state.drawable.brushes);
+      updateAppleShapeSquares();
+      updateApplePawnVisibility();
     },
 
     getFen() {

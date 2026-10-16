@@ -260,6 +260,15 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     moveAnimator.update(delta);
     updateApplePawnVisibility();
 
+    // Knights are turned 180° on their vertical axis when the board is seen from black's side.
+    const knightTurn = currentOrientation === 'black' ? Math.PI : 0;
+    for (const child of board.children) {
+      if (child.userData.isClone && (child.name === 'N' || child.name === 'n')) {
+        child.userData.baseRotationY ??= child.rotation.y;
+        child.rotation.y = (child.userData.baseRotationY as number) + knightTurn;
+      }
+    }
+
     // Custom SVGs stay facing the camera (same as white orientation) while the board rotates.
     for (const group of [systemShapesGroup, userShapesGroup]) {
       for (const child of group.children) {

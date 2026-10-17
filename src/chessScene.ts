@@ -21,6 +21,7 @@ import { createMoveAnimator } from './logic/moveAnimation.js';
 import { setupMoveAttemptAdapter } from './logic/moveAttemptAdapter.js';
 import { updateMeshesFromShapes } from './logic/shapes.js';
 import { keyToCoordinates } from './logic/util.js';
+import { createCoordinateLabels } from './objects/createCoordinates.js';
 import {
   createA1Marker,
   createCheckHighlightMarker,
@@ -69,6 +70,8 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
   const board = new THREE.Group();
   scene.add(board);
   const getKeyAtDomPos = createSquarePicker(htmlElement, scene, camera, board);
+  const coordinateLabels = createCoordinateLabels();
+  board.add(coordinateLabels.group);
   board.add(a1Marker);
   board.add(h8Marker);
   board.add(checkHighlight);
@@ -129,6 +132,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
       return;
     }
     board.rotation.y = orientation === 'white' ? 0 : Math.PI;
+    coordinateLabels.setOrientation(orientation);
     currentOrientation = orientation;
   }
 
@@ -219,6 +223,13 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
   }
 
   function applyState(s: State, previousPieces?: Pieces, hasFen = true) {
+    coordinateLabels.group.visible = s.coordinates;
+    a1Marker.visible = !s.coordinates;
+    h8Marker.visible = !s.coordinates;
+    const border = scene.getObjectByName('Border');
+    if (border) {
+      border.visible = s.coordinates;
+    }
     updatePredropHighlight(s);
     interactionController.setLastMoveSquares(s.highlight.lastMove ? s.lastMove : undefined);
     if (hasFen) {
@@ -347,6 +358,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
 
       unregisterRenderStep();
       stopHandlingResize();
+      coordinateLabels.dispose();
       renderer.dispose();
       controls.dispose();
       htmlElement.removeEventListener('pointermove', hoverController.updateFromPointerEvent);

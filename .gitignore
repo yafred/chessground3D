@@ -2,6 +2,7 @@
 node_modules/
 dist/
 .devenv
+*.blend[0-9]*
 
 /*.js
 /*.d.ts

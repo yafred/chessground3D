@@ -223,6 +223,8 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
   }
 
   function applyState(s: State, previousPieces?: Pieces, hasFen = true) {
+    // no distinction between inside and outside the board for coordinate visibility
+    // we could do it by testing classes coords-in and coords-out on element body of the page
     coordinateLabels.group.visible = s.coordinates;
     a1Marker.visible = !s.coordinates;
     h8Marker.visible = !s.coordinates;

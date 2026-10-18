@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 export function createRenderer(sceneElement: HTMLElement) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.setSize(sceneElement.clientWidth, sceneElement.clientHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setClearColor('#000000', 0); // Set background to transparent

@@ -11,6 +11,16 @@ export function createLights() {
   const key = new THREE.DirectionalLight(0xffffff, 2.2);
   key.position.set(4, 7, 5);
   key.castShadow = true;
+  key.shadow.intensity = 0.35;
+  key.shadow.bias = -0.0001;
+  key.shadow.normalBias = 0.02;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.camera.left = -5;
+  key.shadow.camera.right = 5;
+  key.shadow.camera.top = 5;
+  key.shadow.camera.bottom = -5;
+  key.shadow.camera.near = 0.1;
+  key.shadow.camera.far = 30;
   group.add(key);
 
   // Optional rim light for dark pieces

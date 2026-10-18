@@ -33,15 +33,27 @@ export function createPieceTemplates(scene: THREE.Scene, sceneAssetUrl: string):
         const materialTemplates = new Map<string, THREE.Material>();
 
         gltf.scene.traverse(obj => {
-          if (!(obj instanceof THREE.Mesh) || !pieceNames.has(obj.name)) {
+          if (obj.name === 'Board' || obj.name === 'Border') {
+            obj.traverse(child => {
+              if (child instanceof THREE.Mesh) {
+                child.receiveShadow = true;
+              }
+            });
+          }
+
+          if (!(obj instanceof THREE.Mesh)) {
             return;
           }
 
-          obj.visible = false;
-          pieceTemplates.set(obj.name, obj);
+          obj.castShadow = true;
 
-          if (obj.material && !Array.isArray(obj.material) && materialNames.has(obj.material.name)) {
-            materialTemplates.set(obj.material.name, obj.material);
+          if (pieceNames.has(obj.name)) {
+            obj.visible = false;
+            pieceTemplates.set(obj.name, obj);
+
+            if (obj.material && !Array.isArray(obj.material) && materialNames.has(obj.material.name)) {
+              materialTemplates.set(obj.material.name, obj.material);
+            }
           }
         });
 

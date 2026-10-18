@@ -3,15 +3,19 @@ import * as THREE from 'three';
 export function createLights() {
   const group = new THREE.Group();
 
-  const ambient = new THREE.HemisphereLight('#ffffff', '#444444', 2);
-  const directional1 = new THREE.DirectionalLight('#ffffff', 0.5);
-  directional1.position.set(0, 1, 1);
-  directional1.target.position.set(0, 0, 0);
+  // Soft environment approximation
+  const hemi = new THREE.HemisphereLight(0xbfd8ff, 0x4a3b2f, 0.3);
+  group.add(hemi);
 
-  const directional2 = new THREE.DirectionalLight('#ffffff', 0.5);
-  directional2.position.set(0, 1, -1);
-  directional2.target.position.set(0, 0, 0);
+  // Main light and shadows
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
+  key.position.set(4, 7, 5);
+  key.castShadow = true;
+  group.add(key);
 
-  group.add(ambient, directional1, directional2);
+  // Optional rim light for dark pieces
+  const rim = new THREE.DirectionalLight(0xffffff, 1.0);
+  rim.position.set(-2, 5, -6);
+  group.add(rim);
   return group;
 }

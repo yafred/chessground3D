@@ -73,11 +73,7 @@ export function createCoordinateLabels() {
     setOrientation(orientation: Color) {
       const flip = orientation === 'black';
       for (const { group: label, x, z, axis } of labels) {
-        label.position.set(
-          flip && axis === 'rank' ? -x : x,
-          0.02,
-          flip && axis === 'file' ? -z : z,
-        );
+        label.position.set(flip && axis === 'rank' ? -x : x, 0.02, flip && axis === 'file' ? -z : z);
         label.rotation.y = flip ? -Math.PI : 0;
       }
     },

@@ -804,9 +804,6 @@ export function setupPieceInteraction({
         return;
       }
 
-      event.preventDefault();
-      event.stopPropagation();
-
       pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
       const hasBoardIntersection = pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) !== null;
       if (hasBoardIntersection) {

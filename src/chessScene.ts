@@ -127,6 +127,17 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     state.animation.enabled ? state.animation.duration / 1000 : 0,
   );
 
+  // Knights are turned 180° on their vertical axis when the board is seen from black's side.
+  function updateKnightRotations() {
+    const knightTurn = currentOrientation === 'black' ? Math.PI : 0;
+    for (const child of board.children) {
+      if (child.userData.isClone && (child.name === 'N' || child.name === 'n')) {
+        child.userData.baseRotationY ??= child.rotation.y;
+        child.rotation.y = (child.userData.baseRotationY as number) + knightTurn;
+      }
+    }
+  }
+
   function setOrientation(orientation: Color) {
     if (!orientation || orientation === currentOrientation) {
       return;
@@ -242,6 +253,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
         preservedPieceSquares.add(square);
       }
       piecesToScene(s.pieces, board, pieceTemplates, materialTemplates, preservedPieceSquares);
+      updateKnightRotations();
       updateApplePawnVisibility();
     }
     updateCheckHighlight(checkHighlight, s.check, s.highlight.check);
@@ -273,14 +285,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
     moveAnimator.update(delta);
     updateApplePawnVisibility();
 
-    // Knights are turned 180° on their vertical axis when the board is seen from black's side.
-    const knightTurn = currentOrientation === 'black' ? Math.PI : 0;
-    for (const child of board.children) {
-      if (child.userData.isClone && (child.name === 'N' || child.name === 'n')) {
-        child.userData.baseRotationY ??= child.rotation.y;
-        child.rotation.y = (child.userData.baseRotationY as number) + knightTurn;
-      }
-    }
+    updateKnightRotations();
 
     // Custom SVGs stay facing the camera (same as white orientation) while the board rotates.
     for (const group of [systemShapesGroup, userShapesGroup]) {

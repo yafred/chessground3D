@@ -19,16 +19,6 @@ export function createPieceTemplates(scene: THREE.Scene, sceneAssetUrl: string):
         scene.add(gltf.scene);
         gltf.scene.scale.set(1, 1, 1);
 
-        /*
-        let hasLights = false;
-        gltf.scene.traverse(obj => {
-          if (obj instanceof THREE.Light) {
-            hasLights = true;
-          }
-        });
-        if (!hasLights) scene.add(createLights());
-        */
-
         const pieceTemplates = new Map<string, THREE.Mesh>();
         const materialTemplates = new Map<string, THREE.Material>();
 

@@ -291,6 +291,36 @@ export function setupPieceInteraction({
     return null;
   }
 
+  function canPieceMove(piece: THREE.Mesh): boolean {
+    const dests = isPremoveCandidate(piece) ? premoveDests : allowedMoveDests;
+    if (!dests) {
+      return true;
+    }
+    const key = coordinatesToSquare(
+      getSquareCoordinate(piece.position.x),
+      getSquareCoordinate(piece.position.z),
+    );
+    return (dests.get(key)?.length ?? 0) > 0;
+  }
+
+  // Mouse down on the square of a movable piece, but not on the piece itself
+  function getMovablePieceOnSquareUnderPointer(event: PointerEvent): THREE.Mesh | null {
+    pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
+    if (pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) === null) {
+      return null;
+    }
+    board.worldToLocal(boardPoint);
+    if (!isWithinBoard(boardPoint.x, boardPoint.z)) {
+      return null;
+    }
+    const piece = getPieceAtSquare(
+      scene,
+      getSquareCoordinate(boardPoint.x),
+      getSquareCoordinate(boardPoint.z),
+    );
+    return piece && canInteractWithPiece(piece) && canPieceMove(piece) ? piece : null;
+  }
+
   function getPieceUnderPointer(event: PointerEvent): THREE.Mesh | null {
     return getPieceHitUnderPointer(event)?.piece ?? null;
   }
@@ -818,7 +848,18 @@ export function setupPieceInteraction({
 
       shapeDrawing.clear();
 
-      const pieceHit = getPieceHitUnderPointer(event);
+      let pieceHit = getPieceHitUnderPointer(event);
+      let snapToPointer = false;
+      if (!pieceHit && draggable && !selectedPiece) {
+        const squarePiece = getMovablePieceOnSquareUnderPointer(event);
+        if (squarePiece) {
+          const point = squarePiece.getWorldPosition(new THREE.Vector3());
+          pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
+          pointerRaycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -point.y), point);
+          pieceHit = { piece: squarePiece, point };
+          snapToPointer = true;
+        }
+      }
       if (!pieceHit) {
         return;
       }
@@ -848,8 +889,8 @@ export function setupPieceInteraction({
 
       const grabPoint = pieceHit.point.clone();
       board.worldToLocal(grabPoint);
-      const pointerOffsetX = piece.position.x - grabPoint.x;
-      const pointerOffsetZ = piece.position.z - grabPoint.z;
+      const pointerOffsetX = snapToPointer ? 0 : piece.position.x - grabPoint.x;
+      const pointerOffsetZ = snapToPointer ? 0 : piece.position.z - grabPoint.z;
 
       dragState = {
         piece,

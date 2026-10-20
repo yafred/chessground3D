@@ -119,10 +119,16 @@ export function createChessScene(
         continue;
       }
 
-      child.visible = !appleSquares.some(
+      const coveredByApple = appleSquares.some(
         coords =>
           Math.abs(child.position.x - coords.x) < 0.001 && Math.abs(child.position.z - coords.z) < 0.001,
       );
+      if (coveredByApple) {
+        child.visible = false;
+      } else if (child.userData.hiddenByApple) {
+        child.visible = true;
+      }
+      child.userData.hiddenByApple = coveredByApple;
     }
   }
 

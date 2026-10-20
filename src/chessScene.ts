@@ -135,7 +135,10 @@ export function createChessScene(
   function updateKnightRotations() {
     const knightTurn = currentOrientation === 'black' ? Math.PI : 0;
     for (const child of board.children) {
-      if (child.userData.isClone && (child.name === 'N' || child.name === 'n')) {
+      if (
+        child.userData.isClone &&
+        (child.name === 'N' || child.name === 'n' || child.name === 'B' || child.name === 'b')
+      ) {
         child.userData.baseRotationY ??= child.rotation.y;
         child.rotation.y = (child.userData.baseRotationY as number) + knightTurn;
       }

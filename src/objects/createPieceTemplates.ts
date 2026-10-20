@@ -36,6 +36,7 @@ export function createPieceTemplates(scene: THREE.Scene, sceneAssetUrl: string):
           }
 
           obj.castShadow = true;
+          obj.receiveShadow = true;
 
           if (pieceNames.has(obj.name)) {
             obj.visible = false;

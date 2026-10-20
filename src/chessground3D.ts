@@ -8,7 +8,7 @@ import { opposite } from '@lichess-org/chessground/util';
 import { createChessScene } from './chessScene';
 import { dragNewPiece, registerScene, unregisterScene } from './drag';
 
-export function Chessground(element: HTMLElement, config?: Config): Api {
+export function Chessground(element: HTMLElement, config?: Config, sceneUrl?: string): Api {
   // temporary hack to allow a 2D view
   if (window.localStorage.getItem('chessground3d') === 'false') {
     return Chessground2D(element, config);
@@ -33,7 +33,7 @@ export function Chessground(element: HTMLElement, config?: Config): Api {
   element.classList.add('cg-wrap');
   const container = document.createElement('cg-container');
   element.appendChild(container);
-  const scene = createChessScene(container, state);
+  const scene = createChessScene(container, state, sceneUrl);
   const elements = { board: container, container, wrap: element };
   state.events.insert?.(elements);
   state.dom = {

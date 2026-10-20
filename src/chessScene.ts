@@ -39,7 +39,7 @@ import { createControls } from './systems/controls.js';
 import { registerSceneRenderStep } from './systems/renderScheduler.js';
 import { handleResize } from './systems/resize.js';
 
-const SCENE_ASSET_URL = new URL('/assets/scene.glb', window.location.origin).href; // hardcoded for lila
+const DEFAULT_SCENE_URL = new URL('/assets/scene.glb', window.location.origin).href;
 
 export interface ChessScene {
   set(state: State, hasFen?: boolean, previousPieces?: Pieces): void;
@@ -55,7 +55,11 @@ export interface ChessScene {
   destroy(): void;
 }
 
-export function createChessScene(htmlElement: HTMLElement, state: State): ChessScene {
+export function createChessScene(
+  htmlElement: HTMLElement,
+  state: State,
+  sceneUrl: string = DEFAULT_SCENE_URL,
+): ChessScene {
   const scene = createScene();
   const camera = createCamera(htmlElement);
   const renderer = createRenderer(htmlElement);
@@ -266,7 +270,7 @@ export function createChessScene(htmlElement: HTMLElement, state: State): ChessS
   }
 
   // Load scene and templates (pieces and materials)
-  void createPieceTemplates(scene, SCENE_ASSET_URL).then(
+  void createPieceTemplates(scene, sceneUrl).then(
     ({ pieceTemplates: loadedPieces, materialTemplates: loadedMaterials }) => {
       pieceTemplates = loadedPieces;
       materialTemplates = loadedMaterials;

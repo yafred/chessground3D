@@ -1,4 +1,8 @@
-## Updates in [Lila](https://github.com/lichess-org/lila)
+## Use it online
+
+https://yafred.github.io/chess3D/
+
+## Integrate in [Lila](https://github.com/lichess-org/lila)
 
 ### package.json
 
@@ -16,21 +20,17 @@
     },
 ```
 
-### pnpm-workspace.yaml
+### edit pnpm-workspace.yaml
 
 ```yaml
 allowBuilds:
   chessground3D@https://codeload.github.com/yafred/chessground3D/tar.gz/<commit_id>: true
 ```
 
+### update pnpm-lock.yaml
+
 ```bash
 pnpm update chessground3D
-```
-
-```yaml
-chessground3D:
-  specifier: github:yafred/chessground3D
-  version: https://codeload.github.com/yafred/chessground3D/tar.gz/<commit_id>
 ```
 
 ### Search and replace in \*.ts files

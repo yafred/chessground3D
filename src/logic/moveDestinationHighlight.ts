@@ -38,8 +38,10 @@ export function updateMoveDestinationHighlights(
       continue;
     }
 
+    const isBlackSquare = (coordinates.x + coordinates.z) % 2 !== 0;
+
     const occupyingPiece = getPieceAtSquare(scene, coordinates.x, coordinates.z, selectedPiece);
-    const marker = createMoveDestinationHighlightMarker(!!occupyingPiece);
+    const marker = createMoveDestinationHighlightMarker(!!occupyingPiece, isBlackSquare);
     marker.position.x = coordinates.x;
     marker.position.z = coordinates.z;
     highlightGroup.add(marker);

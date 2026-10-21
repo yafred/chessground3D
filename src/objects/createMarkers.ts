@@ -43,7 +43,7 @@ export function createCheckHighlightMarker() {
 
 export function createMoveDestinationHighlightMarker(isOccupied: boolean, isBlackSquare: boolean) {
   const marker = new THREE.Mesh(
-    new THREE.CircleGeometry(isOccupied ? 0.45 : 0.15, 32),
+    new THREE.CircleGeometry(isOccupied ? 0.5 : 0.15, 32),
     new THREE.MeshBasicMaterial({
       color: isBlackSquare ? '#646f40' : '#829769',
       transparent: true,

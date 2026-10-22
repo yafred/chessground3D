@@ -9,7 +9,6 @@ import {
   createSelectedSquareMarker,
 } from '../objects/createMarkers';
 
-import { createPieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
 import { createShapeDrawingController } from './shapeDrawing.js';
 import {
@@ -86,8 +85,6 @@ export type PieceInteractionController = {
   cancelQueuedPremove: () => void;
   setState: (newState: State | null) => void;
   setUserShapesGroup: (group: THREE.Group) => void;
-  update: () => void;
-  destroy: () => void;
 };
 
 export function setupInteractions({
@@ -153,7 +150,6 @@ export function setupInteractions({
     () => state,
     () => userShapesGroup,
   );
-  const hoverController = createPieceHoverController(scene, camera, renderer.domElement, board);
 
   function pointerNdcFromEvent(event: PointerEvent, out: THREE.Vector2 = new THREE.Vector2()): THREE.Vector2 {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -550,8 +546,6 @@ export function setupInteractions({
         restoreHiddenPiece();
         dragState.piece.position.copy(dragState.startPosition);
         dragState.piece.position.y = dragState.startPosition.y;
-        hoverController.setDraggedPiece(null);
-        hoverController.setIgnoredPiece(null);
         if (renderer.domElement.hasPointerCapture(dragState.pointerId)) {
           renderer.domElement.releasePointerCapture(dragState.pointerId);
         }
@@ -559,11 +553,7 @@ export function setupInteractions({
       }
       renderer.domElement.style.cursor = '';
       clearSelection();
-      hoverController.setEnabled(false);
-      return;
     }
-
-    hoverController.setEnabled(true);
   }
 
   function setAllowWhiteInteraction(allow: boolean) {
@@ -585,14 +575,11 @@ export function setupInteractions({
     if (!draggable && dragState) {
       restoreHiddenPiece();
       dragState.piece.position.copy(dragState.startPosition);
-      hoverController.setDraggedPiece(null);
-      hoverController.setIgnoredPiece(null);
       if (renderer.domElement.hasPointerCapture(dragState.pointerId)) {
         renderer.domElement.releasePointerCapture(dragState.pointerId);
       }
       dragState = null;
       renderer.domElement.style.cursor = '';
-      hoverController.setEnabled(true);
     }
   }
 
@@ -771,9 +758,6 @@ export function setupInteractions({
       piece.position.copy(startPosition);
       piece.position.y = startPosition.y;
       dragState = null;
-      hoverController.setDraggedPiece(null);
-      hoverController.setIgnoredPiece(null);
-      hoverController.setEnabled(true);
 
       if (clickedSquare) {
         state?.events?.select?.(clickedSquare);
@@ -817,11 +801,8 @@ export function setupInteractions({
     }
 
     piece.position.y = startPosition.y;
-    hoverController.setDraggedPiece(null);
     clearSelection();
     dragState = null;
-    hoverController.setIgnoredPiece(null);
-    hoverController.setEnabled(true);
 
     if (renderer.domElement.hasPointerCapture(event.pointerId)) {
       renderer.domElement.releasePointerCapture(event.pointerId);
@@ -904,8 +885,6 @@ export function setupInteractions({
         dragPlane: new THREE.Plane(new THREE.Vector3(0, 1, 0), -pieceHit.point.y),
         hasMoved: false,
       };
-      hoverController.setIgnoredPiece(piece);
-      hoverController.updateFromPointerEvent(event);
       renderer.domElement.setPointerCapture(event.pointerId);
       updateCursor(event);
     },
@@ -922,7 +901,6 @@ export function setupInteractions({
   }
 
   renderer.domElement.addEventListener('pointermove', event => {
-    hoverController.updateFromPointerEvent(event);
     if (!interactionEnabled) {
       return;
     }
@@ -934,8 +912,6 @@ export function setupInteractions({
     if (!dragState || event.pointerId !== dragState.pointerId) {
       return;
     }
-
-    hoverController.updateFromPointerEvent(event);
 
     if (!dragState.hasMoved) {
       const deltaX = event.clientX - dragState.startClientX;
@@ -952,7 +928,6 @@ export function setupInteractions({
 
       const dragStartSquare = coordinatesToSquare(dragState.startPosition.x, dragState.startPosition.z);
       showSelectableMoveHighlights(dragState.piece, dragStartSquare);
-      hoverController.setDraggedPiece(dragState.piece);
     }
 
     dragPieceToPointer(event);
@@ -1029,14 +1004,6 @@ export function setupInteractions({
     }
   });
 
-  function update() {
-    hoverController.update();
-  }
-
-  function destroy() {
-    // remove event listeners
-  }
-
   return {
     moveProgrammaticallyBySquare,
     selectSquare,
@@ -1055,7 +1022,5 @@ export function setupInteractions({
     cancelQueuedPremove,
     setState,
     setUserShapesGroup,
-    update,
-    destroy,
   };
 }

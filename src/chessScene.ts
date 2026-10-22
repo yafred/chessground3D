@@ -304,7 +304,6 @@ export function createChessScene(
       }
     }
 
-    interactionController.update();
     controls.update();
     renderer.render(scene, camera);
   };
@@ -376,7 +375,6 @@ export function createChessScene(
       coordinateLabels.dispose();
       renderer.dispose();
       controls.dispose();
-      interactionController.destroy();
     },
   };
 }

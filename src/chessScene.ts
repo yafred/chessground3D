@@ -14,8 +14,7 @@ import * as THREE from 'three';
 
 import { startScenePieceDrag } from './drag.js';
 import { updateCheckHighlight } from './logic/checkHighlight.js';
-import { createPieceHoverController } from './logic/hover.js';
-import { setupPieceInteraction } from './logic/interaction.js';
+import { setupInteractions } from './logic/interaction.js';
 import { applyInteractionPolicy } from './logic/interactionPolicy.js';
 import { createMoveAnimator } from './logic/moveAnimation.js';
 import { setupMoveAttemptAdapter } from './logic/moveAttemptAdapter.js';
@@ -162,15 +161,11 @@ export function createChessScene(
 
   setOrientation(state.orientation);
 
-  const hoverController = createPieceHoverController(scene, camera, renderer.domElement, board);
-  htmlElement.addEventListener('pointermove', hoverController.updateFromPointerEvent);
-
-  const interactionController = setupPieceInteraction({
+  const interactionController = setupInteractions({
     scene,
     board,
     camera,
     renderer,
-    hoverController,
     animateMove: moveAnimator.animateMove,
   });
   interactionController.setUserShapesGroup(userShapesGroup);
@@ -309,7 +304,7 @@ export function createChessScene(
       }
     }
 
-    hoverController.update();
+    interactionController.update();
     controls.update();
     renderer.render(scene, camera);
   };
@@ -381,7 +376,7 @@ export function createChessScene(
       coordinateLabels.dispose();
       renderer.dispose();
       controls.dispose();
-      htmlElement.removeEventListener('pointermove', hoverController.updateFromPointerEvent);
+      interactionController.destroy();
     },
   };
 }

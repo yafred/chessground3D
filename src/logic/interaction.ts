@@ -9,7 +9,7 @@ import {
   createSelectedSquareMarker,
 } from '../objects/createMarkers';
 
-import { type PieceHoverController } from './hover';
+import { createPieceHoverController } from './hover';
 import { clearMoveDestinationHighlights, updateMoveDestinationHighlights } from './moveDestinationHighlight';
 import { createShapeDrawingController } from './shapeDrawing.js';
 import {
@@ -61,7 +61,6 @@ type SetupPieceInteractionParams = {
   ) => void;
   camera: THREE.Camera;
   renderer: THREE.WebGLRenderer;
-  hoverController: PieceHoverController;
 };
 
 type MoveResult = {
@@ -87,15 +86,16 @@ export type PieceInteractionController = {
   cancelQueuedPremove: () => void;
   setState: (newState: State | null) => void;
   setUserShapesGroup: (group: THREE.Group) => void;
+  update: () => void;
+  destroy: () => void;
 };
 
-export function setupPieceInteraction({
+export function setupInteractions({
   scene,
   board,
   animateMove,
   camera,
   renderer,
-  hoverController,
 }: SetupPieceInteractionParams): PieceInteractionController {
   const pointerRaycaster = new THREE.Raycaster();
   const pointerNdc = new THREE.Vector2();
@@ -153,6 +153,7 @@ export function setupPieceInteraction({
     () => state,
     () => userShapesGroup,
   );
+  const hoverController = createPieceHoverController(scene, camera, renderer.domElement, board);
 
   function pointerNdcFromEvent(event: PointerEvent, out: THREE.Vector2 = new THREE.Vector2()): THREE.Vector2 {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -921,6 +922,7 @@ export function setupPieceInteraction({
   }
 
   renderer.domElement.addEventListener('pointermove', event => {
+    hoverController.updateFromPointerEvent(event);
     if (!interactionEnabled) {
       return;
     }
@@ -1019,13 +1021,13 @@ export function setupPieceInteraction({
     }
   });
 
-  // right-click cancels a queued premove, mirroring lichess's board behavior
-  renderer.domElement.addEventListener('contextmenu', event => {
-    event.preventDefault();
-    if (interactionEnabled) {
-      cancelQueuedPremove();
-    }
-  });
+  function update() {
+    hoverController.update();
+  }
+
+  function destroy() {
+    // remove event listeners
+  }
 
   return {
     moveProgrammaticallyBySquare,
@@ -1045,5 +1047,7 @@ export function setupPieceInteraction({
     cancelQueuedPremove,
     setState,
     setUserShapesGroup,
+    update,
+    destroy,
   };
 }

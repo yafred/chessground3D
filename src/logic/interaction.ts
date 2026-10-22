@@ -1021,6 +1021,14 @@ export function setupInteractions({
     }
   });
 
+  // prevents the context menu from popping when you draw a shape
+  renderer.domElement.addEventListener('contextmenu', event => {
+    event.preventDefault();
+    if (interactionEnabled) {
+      cancelQueuedPremove();
+    }
+  });
+
   function update() {
     hoverController.update();
   }

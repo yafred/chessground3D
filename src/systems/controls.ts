@@ -45,6 +45,8 @@ function saveView(camera: THREE.Camera, controls: OrbitControls) {
 export function createControls(camera: THREE.Camera, domElement: HTMLElement) {
   const controls = new OrbitControls(camera, domElement);
   controls.enabled = false;
+  // OrbitControls sets 'none'; allow page scrolling from empty squares (pieces block it via touchstart).
+  domElement.style.touchAction = 'pan-y';
   controls.enableZoom = false;
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;

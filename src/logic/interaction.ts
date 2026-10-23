@@ -891,6 +891,25 @@ export function setupInteractions({
     { capture: true },
   );
 
+  // Touch starting on a piece must not scroll the page; elsewhere the browser may scroll.
+  renderer.domElement.addEventListener(
+    'touchstart',
+    event => {
+      const touch = event.touches[0];
+      if (!interactionEnabled || !touch || event.touches.length > 1) {
+        return;
+      }
+      const pseudoEvent = { clientX: touch.clientX, clientY: touch.clientY } as PointerEvent;
+      const onPiece =
+        getPieceHitUnderPointer(pseudoEvent) ??
+        (draggable && !selectedPiece ? getMovablePieceOnSquareUnderPointer(pseudoEvent) : null);
+      if (onPiece && event.cancelable) {
+        event.preventDefault();
+      }
+    },
+    { passive: false },
+  );
+
   function updateCursor(event: PointerEvent) {
     const piece = !dragState && interactionEnabled ? getPieceUnderPointer(event) : null;
     renderer.domElement.style.cursor = dragState

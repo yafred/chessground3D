@@ -45,6 +45,7 @@ type ClickState = {
   pointerId: number;
   startClientX: number;
   startClientY: number;
+  handledOnPointerDown?: boolean;
 };
 
 type SetupPieceInteractionParams = {
@@ -186,6 +187,7 @@ export function setupInteractions({
 
   function clearSelectableMoveHighlights() {
     clearMoveDestinationHighlights(selectableMoveHighlights);
+    selectedSquareHighlight.visible = false;
   }
 
   function isPremoveCandidate(piece: THREE.Mesh): boolean {
@@ -207,6 +209,12 @@ export function setupInteractions({
       show ? dests : undefined,
       fromSquareOverride,
     );
+
+    // The selected square highlight shares the lifespan of the move highlights, even when dests are hidden.
+    const origin = fromSquareOverride ? keyToCoordinates(fromSquareOverride) : null;
+    selectedSquareHighlight.visible = true;
+    selectedSquareHighlight.position.x = origin ? origin.x : getSquareCoordinate(piece.position.x);
+    selectedSquareHighlight.position.z = origin ? origin.z : getSquareCoordinate(piece.position.z);
   }
 
   function updatePremoveHighlight() {
@@ -376,9 +384,6 @@ export function setupInteractions({
 
     selectedPiece = piece;
     showSelectableMoveHighlights(piece);
-    selectedSquareHighlight.visible = true;
-    selectedSquareHighlight.position.x = getSquareCoordinate(piece.position.x);
-    selectedSquareHighlight.position.z = getSquareCoordinate(piece.position.z);
   }
 
   function applyMoveOrCapture(
@@ -767,6 +772,8 @@ export function setupInteractions({
         clearSelection();
       } else if (selectable) {
         selectPiece(piece);
+      } else {
+        clearSelectableMoveHighlights();
       }
 
       if (renderer.domElement.hasPointerCapture(event.pointerId)) {
@@ -847,12 +854,27 @@ export function setupInteractions({
       }
       const { piece } = pieceHit;
 
-      if (selectedPiece && piece !== selectedPiece) {
+      // Another piece of the same color starts a new drag; any other piece is a click target (capture).
+      const startsNewDrag =
+        !!selectedPiece &&
+        draggable &&
+        isWhitePiece(piece) === isWhitePiece(selectedPiece) &&
+        canInteractWithPiece(piece);
+      if (selectedPiece && piece !== selectedPiece && !startsNewDrag) {
         clickState = {
           pointerId: event.pointerId,
           startClientX: event.clientX,
           startClientY: event.clientY,
         };
+        if (
+          selectable &&
+          selectedPiece &&
+          isWhitePiece(piece) === isWhitePiece(selectedPiece) &&
+          canInteractWithPiece(piece)
+        ) {
+          selectPiece(piece);
+          clickState.handledOnPointerDown = true;
+        }
         return;
       }
 
@@ -886,6 +908,7 @@ export function setupInteractions({
         hasMoved: false,
       };
       renderer.domElement.setPointerCapture(event.pointerId);
+      showSelectableMoveHighlights(piece);
       updateCursor(event);
     },
     { capture: true },
@@ -971,8 +994,12 @@ export function setupInteractions({
       const deltaX = event.clientX - clickState.startClientX;
       const deltaY = event.clientY - clickState.startClientY;
       const movedPastClickThreshold = Math.hypot(deltaX, deltaY) >= dragThresholdPx;
+      const handledOnPointerDown = clickState.handledOnPointerDown;
       clickState = null;
       if (movedPastClickThreshold) {
+        return;
+      }
+      if (handledOnPointerDown) {
         return;
       }
     }

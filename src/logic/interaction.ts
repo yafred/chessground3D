@@ -16,6 +16,7 @@ import {
   getPieceAtSquare,
   getPieceMeshFromObject,
   getSquareCoordinate,
+  isSmallTouchScreen,
   isWithinBoard,
   keyToCoordinates,
 } from './util';
@@ -283,8 +284,35 @@ export function setupInteractions({
     setLastMoveHighlights(from.x, from.z, to.x, to.z);
   }
 
-  function getPieceHitUnderPointer(event: PointerEvent): { piece: THREE.Mesh; point: THREE.Vector3 } | null {
+  // On small screens fingers cover the piece, so the square under the pointer takes priority over piece hits.
+  function isSmallScreen(): boolean {
+    return isSmallTouchScreen(renderer.domElement.clientWidth, renderer.domElement.clientHeight);
+  }
+
+  function getPieceHitUnderPointer(
+    event: PointerEvent,
+  ): { piece: THREE.Mesh; point: THREE.Vector3; fromSquare?: boolean } | null {
     pointerRaycaster.setFromCamera(pointerNdcFromEvent(event, pointerNdc), camera);
+    if (isSmallScreen()) {
+      if (pointerRaycaster.ray.intersectPlane(boardPlane, boardPoint) === null) {
+        return null;
+      }
+      const point = boardPoint.clone();
+      board.worldToLocal(boardPoint);
+      if (!isWithinBoard(boardPoint.x, boardPoint.z)) {
+        return null;
+      }
+      const piece = getPieceAtSquare(
+        scene,
+        getSquareCoordinate(boardPoint.x),
+        getSquareCoordinate(boardPoint.z),
+      );
+      if (!piece) {
+        return null;
+      }
+      point.y = piece.getWorldPosition(new THREE.Vector3()).y;
+      return { piece, point, fromSquare: true };
+    }
     const hits = pointerRaycaster.intersectObjects(scene.children, true);
     for (const hit of hits) {
       const piece = getPieceMeshFromObject(hit.object);
@@ -331,7 +359,7 @@ export function setupInteractions({
   }
 
   function getSquareKeyUnderPointer(event: PointerEvent): Key | null {
-    const targetPiece = getPieceUnderPointer(event);
+    const targetPiece = isSmallScreen() ? null : getPieceUnderPointer(event);
     if (targetPiece) {
       return coordinatesToSquare(
         getSquareCoordinate(targetPiece.position.x),
@@ -838,7 +866,7 @@ export function setupInteractions({
       shapeDrawing.clear();
 
       let pieceHit = getPieceHitUnderPointer(event);
-      let snapToPointer = false;
+      let snapToPointer = pieceHit?.fromSquare ?? false;
       if (!pieceHit && draggable && !selectedPiece) {
         const squarePiece = getMovablePieceOnSquareUnderPointer(event);
         if (squarePiece) {

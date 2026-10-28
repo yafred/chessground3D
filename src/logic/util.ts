@@ -2,6 +2,19 @@ import type { Key } from '@lichess-org/chessground/types';
 import { key2pos } from '@lichess-org/chessground/util';
 import * as THREE from 'three';
 
+// Canvas smaller than this (px, shortest side) is treated as a smartphone.
+export const SMALL_SCREEN_SIZE_PX = 500;
+
+// Small canvas on a touch device (coarse primary pointer); a mouse on a small viewport doesn't count.
+export function isSmallTouchScreen(width: number, height: number): boolean {
+  return (
+    Math.min(width, height) < SMALL_SCREEN_SIZE_PX &&
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(pointer: coarse)').matches
+  );
+}
+
 export const pieceCodes = new Set(['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p']);
 
 export function getPieceMeshFromObject(object: THREE.Object3D | null): THREE.Mesh | null {

@@ -1,7 +1,7 @@
 import { type Key } from '@lichess-org/chessground/types';
 import * as THREE from 'three';
 
-import { coordinatesToSquare, getPieceMeshFromObject } from '../logic/util.js';
+import { coordinatesToSquare, getPieceMeshFromObject, isSmallTouchScreen } from '../logic/util.js';
 
 export function createSquarePicker(
   htmlElement: HTMLElement,
@@ -25,10 +25,14 @@ export function createSquarePicker(
     pointerRaycaster.setFromCamera(pointerNdc, camera);
 
     // Prefer the piece under the pointer, so its square wins even if the ray also clips the board plane elsewhere.
-    const pieceHit = pointerRaycaster
-      .intersectObjects(scene.children, true)
-      .map(hit => getPieceMeshFromObject(hit.object))
-      .find((mesh): mesh is THREE.Mesh => mesh !== null);
+    // On small screens (fingers cover pieces) the square under the pointer wins instead.
+    const smallScreen = isSmallTouchScreen(rect.width, rect.height);
+    const pieceHit = smallScreen
+      ? undefined
+      : pointerRaycaster
+          .intersectObjects(scene.children, true)
+          .map(hit => getPieceMeshFromObject(hit.object))
+          .find((mesh): mesh is THREE.Mesh => mesh !== null);
     if (pieceHit) {
       const squareX = Math.round(pieceHit.position.x + 3.5) - 3.5;
       const squareZ = Math.round(pieceHit.position.z + 3.5) - 3.5;

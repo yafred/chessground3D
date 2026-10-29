@@ -1,8 +1,8 @@
 <img width="1484" height="1021" alt="image" src="https://github.com/user-attachments/assets/b1b153c3-2f3a-4bac-9a4a-958a748d20af" />
 
-## Use it online
+## Test it online
 
-https://yafred.github.io/chess3D/
+https://yafred.github.io/chess3D/ (Client using the public API)
 
 ## Integrate in [Lila](https://github.com/lichess-org/lila)
 

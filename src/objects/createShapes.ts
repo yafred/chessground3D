@@ -150,6 +150,7 @@ export function createCustomSvgMesh(x: number, z: number, svgHtml: string, size 
     map: texture,
     transparent: true,
     depthWrite: false,
+    depthTest: false,
     side: THREE.DoubleSide,
   });
 
@@ -165,8 +166,7 @@ export function createCustomSvgMesh(x: number, z: number, svgHtml: string, size 
     fullSvg = trimmedSvg;
   } else {
     // The 200x200 viewBox lets badges and drop shadows overlap adjacent squares without clipping.
-    const transform = isAppleGraphic ? '' : ' transform="translate(0, 84)"';
-    fullSvg = `<svg xmlns="${SVG_NAMESPACE}" viewBox="-50 -50 200 200" width="512" height="512" style="overflow: visible"><g${transform}>${svgHtml}</g></svg>`;
+    fullSvg = `<svg xmlns="${SVG_NAMESPACE}" viewBox="-50 -50 200 200" width="512" height="512" style="overflow: visible"><g>${svgHtml}</g></svg>`;
   }
   if (isAppleGraphic) {
     fullSvg = centerAppleGraphic(fullSvg);

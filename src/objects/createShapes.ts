@@ -149,6 +149,7 @@ export function createCustomSvgMesh(x: number, z: number, svgHtml: string, size 
   const material = new THREE.MeshBasicMaterial({
     map: texture,
     transparent: true,
+    opacity: 0.7,
     depthWrite: false,
     depthTest: false,
     side: THREE.DoubleSide,

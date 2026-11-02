@@ -12,8 +12,8 @@ export function createLights() {
   key.position.set(4, 7, 5);
   key.castShadow = true;
   key.shadow.intensity = 0.35;
-  key.shadow.bias = -0.0001;
-  key.shadow.normalBias = 0.02;
+  key.shadow.bias = -0.0005;
+  key.shadow.normalBias = 0.05;
   key.shadow.mapSize.set(2048, 2048);
   key.shadow.camera.left = -5;
   key.shadow.camera.right = 5;
